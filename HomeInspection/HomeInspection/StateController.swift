@@ -119,22 +119,31 @@ class StateController {
     
     // Translates the cells location into a comment id
     func getCommentId(sectionNum: Int, subSectionNum: Int, rowNum: Int) -> Int? {
-        return 4 * (subSectionNum - 1) + (rowNum - 1)
-        /*
         print("Getting comment ID for cell in Section: \(sectionNum), Subsection \(subSectionNum), with Rank: \(rowNum)")
+        var section: Section
+        var subSection: SubSection
+        var comment: Comment
+        var commentId = -1
         
-        let subSectionIndex = sections[sectionNum].subSectionIds[subSectionNum]
-        var commentIndex: Int
-        
-        for (index, subSection) in self.subsections {
-            if (
+        if (sections.count > sectionNum) {
+            section = sections[sectionNum]
+            print("Found section \(section.sectionId!)")
+            if (section.subSectionIds.count > subSectionNum &&
+                subsections.count > section.subSectionIds[subSectionNum]) {
+                
+                subSection = subsections[section.subSectionIds[subSectionNum]]
+                print("Found subsection \(subSection.sectionId!)")
+                if (subSection.commentIds.count > rowNum &&
+                    comments.count > subSection.commentIds[rowNum]) {
+                    
+                    comment = comments[subSection.commentIds[rowNum]]
+                    commentId = comment.commentId!
+                    print("Found comment \(comment.commentId!)")
+                }
+            }
         }
-        
-        let subSection = subsections[subSectionNum]
-        let comment = comments[rowNum - 1]
-        
-        return comment.commentId
- */
+
+        return commentId
     }
     
     // Get subsection cell information

@@ -26,7 +26,7 @@ class InspectionTableViewController: UITableViewController {
     
     /* Properties */
     
-    let BASE_NUM_COMMENTS = 3
+    let BASE_NUM_COMMENTS = 0
     
     var sectionId: Int!
     var subSections = [SubSection]()
@@ -169,7 +169,10 @@ class InspectionTableViewController: UITableViewController {
         
         // Translates the cells location into a comment id
         cell.commentId = state.getCommentId(sectionNum: 1, subSectionNum: section + 1, rowNum: row)!
-        
+        // NOT ALL COMMENTS ARE IMPLEMENTED YET, IF NOT IMPLEMENTED, USING 0 FOR NOW
+        if (cell.commentId == -1) {
+            cell.commentId = 0
+        }
         // Gets the status of the comment with id commentId from the comment table
         //cell.commentStatus.setOn(state.getCommentState(commentId: Int(cell.commentId!)), animated: false)
         
