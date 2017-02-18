@@ -27,7 +27,7 @@ class PaneTableViewController: UITableViewController {
         
         // Remove selection highlighting
         paneCell.selectionStyle = UITableViewCellSelectionStyle.none
-        paneCell.sectionId = indexPath.row + 1
+        paneCell.sectionId = indexPath.row
         
         print("Created Cell with row: \(indexPath.row)")
         

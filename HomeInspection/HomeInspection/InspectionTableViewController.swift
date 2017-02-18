@@ -67,7 +67,7 @@ class InspectionTableViewController: UITableViewController {
     // REQUIRED: Set the number of rows per section (Comments in a subsection + 1 for the subsection header)
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // Return the number of rows (demo value for now)
-        return 4
+        return 5
     }
 
     // REQUIRED: Initialize/Reuse table cells based on identifier
@@ -99,7 +99,7 @@ class InspectionTableViewController: UITableViewController {
             let subSectionCell = cell as! SubSectionHeaderViewCell
             
             // Initialize subsection cell values
-            initSubSectionCell(cell: subSectionCell, section: indexPath.section)
+            initSubSectionCell(cell: subSectionCell, section: sectionId, subSection: indexPath.section)
             
             return subSectionCell
         }
@@ -132,9 +132,10 @@ class InspectionTableViewController: UITableViewController {
     /* Helper Functions */
     
     // Initializes subsection cells with values loaded from the state controller
-    func initSubSectionCell(cell: SubSectionHeaderViewCell, section: Int) {
-        cell.subSectionLabel.text = "Subsection \(section + 1)"
-        cell.subSectionStatusLabel.text = "All clear for Subsection \(section + 1)"
+    func initSubSectionCell(cell: SubSectionHeaderViewCell, section: Int, subSection: Int) {
+        let subSectionText = StateController.state.getSubSectionText(sectionIndex: sectionId, subSectionNum: subSection)
+        cell.subSectionLabel.text = subSectionText
+        cell.subSectionStatusLabel.text = "All clear for \(subSectionText)"
     }
     
     // Initializes comment cells with values loaded from the state controller
@@ -143,7 +144,7 @@ class InspectionTableViewController: UITableViewController {
         var commentText: String
         
         // Translates the cells location into a comment id
-        cell.commentId = Int32(state.getCommentId(section: 1, subSection: section + 1, row: row)!)
+        cell.commentId = Int32(state.getCommentId(sectionNum: 1, subSectionNum: section + 1, rowNum: row)!)
         
         // Gets the status of the comment with id commentId from the comment table
         //cell.commentStatus.setOn(state.getCommentState(commentId: Int(cell.commentId!)), animated: false)
