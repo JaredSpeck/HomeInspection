@@ -12,8 +12,8 @@ class CommentViewCell: UITableViewCell {
 
     
     // Properties
-    var commentId: Int32? = nil
-    var resultId: Int32? = nil
+    var commentId: Int? = nil
+    var resultId: Int? = nil
     var commentTextAttributes: [String : Any] = [
         NSFontAttributeName : UIFont.systemFont(ofSize: 16.0),
         NSForegroundColorAttributeName : UIColor.lightText,
@@ -59,7 +59,7 @@ class CommentViewCell: UITableViewCell {
     
     // Changes comment text appearance based off of its severity (value passed in from the state controller)
     func updateSeverity(severity: Int8) {
-        print("Updating view for result \(self.resultId) to match severity \(severity)")
+        print("Updating view for result \(self.resultId!) to match severity \(severity)")
         
         let oldText: String = (commentTextButton.titleLabel?.text)!
         var newText: NSMutableAttributedString
@@ -67,12 +67,19 @@ class CommentViewCell: UITableViewCell {
         switch (severity) {
         case 0:
             // Low severity -> underline
-            commentTextAttributes[NSUnderlineStyleAttributeName] = 1
+            commentTextAttributes[NSUnderlineStyleAttributeName] = 0
             commentTextAttributes[NSFontAttributeName] = UIFont.systemFont(ofSize: 16)
             newText = NSMutableAttributedString(string: oldText, attributes: commentTextAttributes)
             commentTextButton.setAttributedTitle(newText, for: .normal)
             break;
         case 1:
+            // Low severity -> underline
+            commentTextAttributes[NSUnderlineStyleAttributeName] = 1
+            commentTextAttributes[NSFontAttributeName] = UIFont.systemFont(ofSize: 16)
+            newText = NSMutableAttributedString(string: oldText, attributes: commentTextAttributes)
+            commentTextButton.setAttributedTitle(newText, for: .normal)
+            break;
+        case 2:
             // High severity -> bold + underline
             commentTextAttributes[NSUnderlineStyleAttributeName] = 1
             commentTextAttributes[NSFontAttributeName] = UIFont.boldSystemFont(ofSize: 16)

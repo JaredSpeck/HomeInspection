@@ -29,13 +29,13 @@ class StateController {
     
     
     // TODO: Need a way to get the next available inspection id from the server. Maybe use a temp id for offline cache, then assign a permanent id right before integrating into database.
-    private var inspectionId: Int32? = nil
-    private var nextResultId: Int32 = 0
+    private var inspectionId: Int? = nil
+    private var nextResultId: Int = 0
     
     // Arrays are indexed by their respective unique id's
     
     // List of inspection results with unique resultId
-    private var results = [Result]()
+    private var results = [Result?]()
     
     // List of all section names with unique sectionId
     private(set) var sections = [Section]()
@@ -50,6 +50,7 @@ class StateController {
     private var commentIds = [[[Int]]]()
     
     private var dataIsInitialized: Bool = false
+    private var reusableResultIds = [Int]()
     
     /* End of Properties */
     
@@ -78,34 +79,41 @@ class StateController {
      * calling controller's view
      */
     // Appends the results array with a new entry with the given comment id. Returns the result id of the new entry
-    func userAddedResult(commentId: Int32) -> Int32 {
+    func userAddedResult(commentId: Int) -> Int {
         results.append(Result(id: nextResultId, inspectionId: getNextInspId(), commentId: commentId))
-        let returnId = nextResultId
+        var returnId: Int
         
-        nextResultId += 1
+        if (reusableResultIds.count > 0) {
+            returnId = reusableResultIds.popLast()!
+        }
+        else {
+            returnId = nextResultId
+            nextResultId += 1
+        }
         
         return returnId
         
     }
-    func userRemovedResult(resultId: Int32) -> Int32 {
+    func userRemovedResult(resultId: Int) -> Void {
         // Not sure what to return here for error checking yet. Removing might totally break array indexing as the array collapses down, but the ids dont update to match
-        return 1
+        reusableResultIds.append((Int(resultId)))
+        results[resultId] = nil
     }
     // Adds one to the severity and modulo's the result by 3. Returns the new severity value
-    func userChangedSeverity(resultId: Int32) -> Int8 {
-        self.results[Int(resultId)].severity = (self.results[Int(resultId)].severity + 1) % 2
-        return self.results[Int(resultId)].severity
+    func userChangedSeverity(resultId: Int) -> Int8 {
+        self.results[Int(resultId)]!.severity = ((self.results[Int(resultId)]!.severity + 1) % 2) + 1
+        return self.results[resultId]!.severity
     }
     
-    func userChangedNote(resultId: Int32, note: String) -> String {
+    func userChangedNote(resultId: Int, note: String) -> String {
         return note
     }
     
-    func userChangedPhoto(resultId: Int32, photoPath: String) -> String {
+    func userChangedPhoto(resultId: Int, photoPath: String) -> String {
         return photoPath
     }
     
-    func userChangedFlags(resultId: Int32, flagNums: [Int8]) -> [Int8] {
+    func userChangedFlags(resultId: Int, flagNums: [Int8]) -> [Int8] {
         return flagNums
     }
     
@@ -195,7 +203,7 @@ class StateController {
         commentIds[sectionNum][subSectionNum][rowNum] = commentId;
     }
     
-    func getNextInspId() -> Int32 {
+    func getNextInspId() -> Int {
         // TODO: Implement later, for now always assigns the first slot in the local inspection cache
         return -1;
     }

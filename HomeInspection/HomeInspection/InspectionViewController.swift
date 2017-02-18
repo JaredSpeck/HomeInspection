@@ -13,7 +13,7 @@ class InspectionViewController: UIViewController {
     
     
     // Properties
-    var sectionId: Int! = 1
+    var sectionId: Int! = 0
     @IBOutlet weak var sectionLabel: UILabel!
     
     
@@ -23,7 +23,7 @@ class InspectionViewController: UIViewController {
         sectionLabel.text = newSection.sectionName
         
         // ADD CODE TO LOAD SECTION/SUBSECTION/COMMENTS
-        NotificationCenter.default.post(name: Notification.Name(rawValue: "refresh"), object: nil)
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "refreshSection"), object: sectionId)
     }
     
     // Other Functions

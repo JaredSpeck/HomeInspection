@@ -10,24 +10,34 @@ import UIKit
 
 class SubSection {
 
-    // MARK: - Properties
+    // Database variables
     var subSectionId: Int!
     var sectionId: Int!
     var subSectionName: String!
     
+    // Application variables
     var commentIds: [Int]!
+    var isExpanded: Bool = false
     
     // MARK: - Initializer
     init!(subSectionId: Int!, name: String!, sectionId: Int!) {
-        
         print("Added subSeciton \(subSectionId!) to section: \(sectionId!)")
-        // Initialize properties with given values
+        
+        
+        // Initialize database loaded values
+        
         self.subSectionId = subSectionId
         self.subSectionName = name
         self.sectionId = sectionId
         
+        
+        // Initialize app-specific values
+
+        // Used for accessing id's of comments in this subsection
         self.commentIds = [Int]()
         
+        // Used to tell if a subsection has been expanded to view more than top X comments
+        self.isExpanded = false
     }
 
 }
