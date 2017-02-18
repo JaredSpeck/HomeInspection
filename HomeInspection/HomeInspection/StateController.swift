@@ -284,6 +284,50 @@ class StateController {
         }
     }
     
+    
+    
+    // TODO: Decide whether to do database surgery to fix 121 offset in subsection id or not
+    func parseDefaultData(json: JSON) {
+        for (_, sectionJson) in json["sections"] {
+            self.sections.append(
+                Section(
+                    id: sectionJson["id"].intValue,
+                    name: sectionJson["name"].string
+                )
+            )
+            
+            for (_, subSectionJson) in sectionJson["subsections"] {
+                self.subsections.append(
+                    SubSection(
+                        subSectionId: subSectionJson["id"].intValue - 121,
+                        name: subSectionJson["name"].string,
+                        sectionId: subSectionJson["sec_id"].intValue
+                    )
+                )
+                
+                // Add subsec id to section's subsec list
+                self.sections.last!.subSectionIds.append(subsections.last!.subSectionId)
+                
+                for (_, commentJson) in subSectionJson["comments"] {
+                    self.comments.append(
+                        Comment(
+                            commentId: commentJson["id"].intValue,
+                            subSectionId: commentJson["subsec_id"].intValue - 121,
+                            rank: 0,
+                            commentText: commentJson["comment"].string,
+                            defaultFlags: [], //Fix this
+                            active: commentJson["active"] == 1 ? true:false
+                        )
+                    )
+                    
+                    // Add comment id to subsection's comment list
+                    self.subsections.last!.commentIds.append(comments.last!.commentId)
+                }
+            }
+        }
+    }
+    
+    
     /* End of Database Integration Functions */
     
 }
