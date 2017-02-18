@@ -26,13 +26,13 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B0z-vb-k3I">
                                 <rect key="frame" x="0.0" y="0.0" width="228" height="95.5"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" numberOfLines="0" minimumFontSize="12" translatesAutoresizingMaskIntoConstraints="NO" id="pGI-5X-3Vw">
-                                        <rect key="frame" x="25" y="35" width="178" height="26"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" numberOfLines="0" minimumFontSize="10" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pGI-5X-3Vw">
+                                        <rect key="frame" x="8" y="8" width="212" height="79.5"/>
                                         <attributedString key="attributedText">
                                             <fragment content="SubSection">
                                                 <attributes>
                                                     <color key="NSColor" cocoaTouchSystemColor="lightTextColor"/>
-                                                    <font key="NSFont" metaFont="system" size="22"/>
+                                                    <font key="NSFont" size="20" name=".SFNSDisplay-Regular"/>
                                                     <paragraphStyle key="NSParagraphStyle" alignment="center" lineBreakMode="truncatingTail" baseWritingDirection="natural" lineSpacing="1" tighteningFactorForTruncation="0.0"/>
                                                 </attributes>
                                             </fragment>
@@ -42,9 +42,10 @@
                                 </subviews>
                                 <color key="backgroundColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstItem="pGI-5X-3Vw" firstAttribute="leading" secondItem="B0z-vb-k3I" secondAttribute="leading" constant="25" id="7nc-2W-VY4"/>
-                                    <constraint firstItem="pGI-5X-3Vw" firstAttribute="centerY" secondItem="B0z-vb-k3I" secondAttribute="centerY" id="MAk-S1-FPq"/>
-                                    <constraint firstAttribute="trailing" secondItem="pGI-5X-3Vw" secondAttribute="trailing" constant="25" id="UY4-tS-IMb"/>
+                                    <constraint firstAttribute="bottomMargin" secondItem="pGI-5X-3Vw" secondAttribute="bottom" id="8DO-MW-K3o"/>
+                                    <constraint firstItem="pGI-5X-3Vw" firstAttribute="leading" secondItem="B0z-vb-k3I" secondAttribute="leadingMargin" id="ATR-Qs-bPp"/>
+                                    <constraint firstAttribute="trailingMargin" secondItem="pGI-5X-3Vw" secondAttribute="trailing" id="cPZ-Oy-7Hd"/>
+                                    <constraint firstItem="pGI-5X-3Vw" firstAttribute="top" secondItem="B0z-vb-k3I" secondAttribute="topMargin" id="eRO-iZ-v1Z"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2L1-cb-gWc">
