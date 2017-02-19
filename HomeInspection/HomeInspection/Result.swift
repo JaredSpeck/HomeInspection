@@ -11,17 +11,17 @@ import UIKit
 class Result {
     
     // Set on initialization (immutable)
-    let id: Int32
-    let inspectionId: Int32
-    let commentId: Int32
+    let id: Int
+    let inspectionId: Int
+    let commentId: Int
     
     // Set when used (mutable)
     var severity: Int8
-    var flags: [Int32]?
+    var flags: [Int]?
     var photoPath: String?
     
     // Result initializer
-    init(id: Int32, inspectionId: Int32, commentId: Int32) {
+    init(id: Int, inspectionId: Int, commentId: Int) {
         self.id = id
         self.inspectionId = inspectionId
         self.commentId = commentId

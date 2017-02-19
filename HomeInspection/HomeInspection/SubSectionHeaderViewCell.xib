@@ -26,13 +26,13 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B0z-vb-k3I">
                                 <rect key="frame" x="0.0" y="0.0" width="228" height="95.5"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" numberOfLines="0" minimumFontSize="12" translatesAutoresizingMaskIntoConstraints="NO" id="pGI-5X-3Vw">
-                                        <rect key="frame" x="25" y="35" width="178" height="26"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" numberOfLines="0" minimumFontSize="10" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pGI-5X-3Vw">
+                                        <rect key="frame" x="8" y="8" width="212" height="79.5"/>
                                         <attributedString key="attributedText">
                                             <fragment content="SubSection">
                                                 <attributes>
                                                     <color key="NSColor" cocoaTouchSystemColor="lightTextColor"/>
-                                                    <font key="NSFont" metaFont="system" size="22"/>
+                                                    <font key="NSFont" size="20" name=".SFNSDisplay-Regular"/>
                                                     <paragraphStyle key="NSParagraphStyle" alignment="center" lineBreakMode="truncatingTail" baseWritingDirection="natural" lineSpacing="1" tighteningFactorForTruncation="0.0"/>
                                                 </attributes>
                                             </fragment>
@@ -42,9 +42,10 @@
                                 </subviews>
                                 <color key="backgroundColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstItem="pGI-5X-3Vw" firstAttribute="leading" secondItem="B0z-vb-k3I" secondAttribute="leading" constant="25" id="7nc-2W-VY4"/>
-                                    <constraint firstItem="pGI-5X-3Vw" firstAttribute="centerY" secondItem="B0z-vb-k3I" secondAttribute="centerY" id="MAk-S1-FPq"/>
-                                    <constraint firstAttribute="trailing" secondItem="pGI-5X-3Vw" secondAttribute="trailing" constant="25" id="UY4-tS-IMb"/>
+                                    <constraint firstAttribute="bottomMargin" secondItem="pGI-5X-3Vw" secondAttribute="bottom" id="8DO-MW-K3o"/>
+                                    <constraint firstItem="pGI-5X-3Vw" firstAttribute="leading" secondItem="B0z-vb-k3I" secondAttribute="leadingMargin" id="ATR-Qs-bPp"/>
+                                    <constraint firstAttribute="trailingMargin" secondItem="pGI-5X-3Vw" secondAttribute="trailing" id="cPZ-Oy-7Hd"/>
+                                    <constraint firstItem="pGI-5X-3Vw" firstAttribute="top" secondItem="B0z-vb-k3I" secondAttribute="topMargin" id="eRO-iZ-v1Z"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2L1-cb-gWc">
@@ -77,20 +78,32 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="W0f-pd-LEr">
                                 <rect key="frame" x="910" y="0.0" width="114" height="95.5"/>
                                 <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="S2W-ZX-YPy">
+                                        <rect key="frame" x="8" y="48.5" width="98" height="0.0"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
+                                        <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="kPg-wt-zl5">
                                         <rect key="frame" x="0.0" y="0.0" width="114" height="95.5"/>
                                         <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
-                                        <state key="normal" title="+">
+                                        <state key="normal">
                                             <color key="titleColor" cocoaTouchSystemColor="lightTextColor"/>
                                         </state>
+                                        <connections>
+                                            <action selector="expandButtonTap:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="tv0-vq-YmP"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <color key="backgroundColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstItem="kPg-wt-zl5" firstAttribute="top" secondItem="W0f-pd-LEr" secondAttribute="top" id="2JB-HK-8SP"/>
                                     <constraint firstAttribute="bottom" secondItem="kPg-wt-zl5" secondAttribute="bottom" id="4zR-0U-C2U"/>
+                                    <constraint firstItem="S2W-ZX-YPy" firstAttribute="centerY" secondItem="W0f-pd-LEr" secondAttribute="centerY" id="66Y-a1-Hsh"/>
                                     <constraint firstAttribute="trailing" secondItem="kPg-wt-zl5" secondAttribute="trailing" id="Th6-Q4-QGP"/>
                                     <constraint firstItem="kPg-wt-zl5" firstAttribute="leading" secondItem="W0f-pd-LEr" secondAttribute="leading" id="Zhh-jQ-l4D"/>
+                                    <constraint firstAttribute="trailingMargin" secondItem="S2W-ZX-YPy" secondAttribute="trailing" id="mmj-mm-U7K"/>
+                                    <constraint firstItem="S2W-ZX-YPy" firstAttribute="leading" secondItem="W0f-pd-LEr" secondAttribute="leadingMargin" id="nfg-4B-Zjw"/>
                                 </constraints>
                             </view>
                         </subviews>
@@ -109,6 +122,7 @@
                 </constraints>
             </tableViewCellContentView>
             <connections>
+                <outlet property="expandButtonLabel" destination="S2W-ZX-YPy" id="uhK-hE-Imx"/>
                 <outlet property="subSectionLabel" destination="pGI-5X-3Vw" id="ibK-CZ-PzH"/>
                 <outlet property="subSectionStatus" destination="1eY-FL-KbN" id="sgq-bW-JrB"/>
                 <outlet property="subSectionStatusLabel" destination="LK0-YZ-AuK" id="lth-12-BCF"/>

@@ -14,9 +14,12 @@ class SubSectionHeaderViewCell: UITableViewCell {
     @IBOutlet weak var subSectionLabel: UILabel!
     @IBOutlet weak var subSectionStatus: UISwitch!
     @IBOutlet weak var subSectionStatusLabel: UILabel!
+    @IBOutlet weak var expandButtonLabel: UILabel!
+    @IBAction func expandButtonTap(_ sender: Any) {
+        self.expandButtonTapAction?(self)
+    }
 
-
-    
+    var expandButtonTapAction: ((SubSectionHeaderViewCell) -> Void)?
     
     // MARK - Functions
     

@@ -20,7 +20,7 @@ class Section {
     
     init(id: Int!, name: String!) {
         
-        print("Addded section \(id!)")
+        //print("Addded section \(id!)")
         
         self.sectionId = id
         self.sectionName = name

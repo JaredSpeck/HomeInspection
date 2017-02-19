@@ -11,12 +11,12 @@ import UIKit
 
 
 protocol ResultDataDelegate {
-    func userAddedResult(commentId: Int32) -> Int32
-    func userRemovedResult(resultId: Int32) -> Int32
-    func userChangedSeverity(resultId: Int32) -> Int8
-    func userChangedNote(resultId: Int32, note: String) -> String
-    func userChangedPhoto(resultId: Int32, photoPath: String) -> String
-    func userChangedFlags(resultId: Int32, flagNums: [Int8]) -> [Int8]
+    func userAddedResult(commentId: Int) -> Int
+    func userRemovedResult(resultId: Int) -> Int
+    func userChangedSeverity(resultId: Int) -> Int8
+    func userChangedNote(resultId: Int, note: String) -> String
+    func userChangedPhoto(resultId: Int, photoPath: String) -> String
+    func userChangedFlags(resultId: Int, flagNums: [Int8]) -> [Int8]
 }
 
 
@@ -24,8 +24,9 @@ protocol ResultDataDelegate {
 class InspectionTableViewController: UITableViewController {
 
     
-    
     /* Properties */
+    
+    let BASE_NUM_COMMENTS = 4
     
     var sectionId: Int!
     var subSections = [SubSection]()
@@ -41,8 +42,11 @@ class InspectionTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Register table refresh notification
-        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "refresh"), object: nil, queue: nil, using: refreshTable)
+        // Register refresh notifications
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "refreshSection"), object: nil, queue: nil, using: refreshSection)
+        
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "refreshSubSection"), object: nil, queue: nil, using: refreshSubSection)
+        
 
         // Register XIB reuse identifiers
         let sscell = UINib(nibName: "SubSectionHeaderViewCell", bundle: nil)
@@ -60,14 +64,27 @@ class InspectionTableViewController: UITableViewController {
 
     // REQUIRED: Set the number of sections in the table (= number of subsections for the chosen section)
     override func numberOfSections(in tableView: UITableView) -> Int {
-        // Return the number of sections (demo value for now)
-        return 4
+        // Return the number of sections (subsections in a given section)
+        return StateController.state.sections[sectionId!].subSectionIds.count
     }
 
     // REQUIRED: Set the number of rows per section (Comments in a subsection + 1 for the subsection header)
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // Return the number of rows (demo value for now)
-        return 4
+        // Number of cells = number of comments + 1 (for the subsection header)
+        var numCommentsShown = 1 + BASE_NUM_COMMENTS
+        
+        let state = StateController.state
+        let currentSection = state.sections[sectionId!]
+        let currentSubSection = state.subsections[currentSection.subSectionIds[section]]
+        let expandedNumCells = 1 + currentSubSection.commentIds.count
+        
+        if (state.subsections[section].isExpanded ||
+            expandedNumCells < numCommentsShown) {
+            
+            numCommentsShown = expandedNumCells
+        }
+        
+        return numCommentsShown
     }
 
     // REQUIRED: Initialize/Reuse table cells based on identifier
@@ -99,7 +116,7 @@ class InspectionTableViewController: UITableViewController {
             let subSectionCell = cell as! SubSectionHeaderViewCell
             
             // Initialize subsection cell values
-            initSubSectionCell(cell: subSectionCell, section: indexPath.section)
+            initSubSectionCell(cell: subSectionCell, subSection: indexPath.section)
             
             return subSectionCell
         }
@@ -129,12 +146,26 @@ class InspectionTableViewController: UITableViewController {
     
     
     
-    /* Helper Functions */
+    /* Cell Initialization Functions */
     
     // Initializes subsection cells with values loaded from the state controller
-    func initSubSectionCell(cell: SubSectionHeaderViewCell, section: Int) {
-        cell.subSectionLabel.text = "Subsection \(section + 1)"
-        cell.subSectionStatusLabel.text = "All clear for Subsection \(section + 1)"
+    func initSubSectionCell(cell: SubSectionHeaderViewCell, subSection: Int) {
+        let state = StateController.state
+        
+        // Set cell text
+        let subSectionText = state.getSubSectionText(sectionIndex: sectionId, subSectionNum: subSection)
+        cell.subSectionLabel.text = subSectionText
+        cell.subSectionStatusLabel.text = "All clear for \(subSectionText)"
+        cell.expandButtonLabel.text = (state.subsections[subSection].isExpanded ? "-" : "+")
+        
+        // Set expand button function
+        cell.expandButtonTapAction = { (cell) in
+            let isExpanded = state.subsections[subSection].isExpanded
+            //print("Setting subsection \(subSection) expansion to \(!isExpanded)")
+            state.subsections[subSection].isExpanded = !isExpanded
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "refreshSubSection"), object: subSection)
+        }
+        
     }
     
     // Initializes comment cells with values loaded from the state controller
@@ -143,8 +174,8 @@ class InspectionTableViewController: UITableViewController {
         var commentText: String
         
         // Translates the cells location into a comment id
-        cell.commentId = Int32(state.getCommentId(section: 1, subSection: section + 1, row: row)!)
-        
+        cell.commentId = state.getCommentId(sectionNum: sectionId!, subSectionNum: section, rowNum: row)!
+
         // Gets the status of the comment with id commentId from the comment table
         //cell.commentStatus.setOn(state.getCommentState(commentId: Int(cell.commentId!)), animated: false)
         
@@ -155,8 +186,14 @@ class InspectionTableViewController: UITableViewController {
         // Sets the cell to display text on more than one line
         cell.commentTextButton.titleLabel?.lineBreakMode = NSLineBreakMode.byWordWrapping
         
+        // NOT ALL COMMENTS ARE IMPLEMENTED YET, IF NOT IMPLEMENTED, USING 'ERROR' FOR NOW
         // Gets the plain comment text from the state controller
-        commentText = state.getCommentText(commentId: Int(cell.commentId!))
+        if (cell.commentId == -1) {
+            commentText = "ERROR"
+        }
+        else {
+            commentText = state.getCommentText(commentId: cell.commentId!)
+        }
         
         // Sets the comment text
         cell.commentTextButton.setAttributedTitle(NSMutableAttributedString(string: commentText, attributes: cell.commentTextAttributes), for: .normal)
@@ -169,8 +206,13 @@ class InspectionTableViewController: UITableViewController {
             if (cell.resultId == nil && isOn) {
                 // Need to assign a comment id to the cell first...
                 cell.resultId = StateController.state.userAddedResult(commentId: cell.commentId!)
-                
+                cell.updateSeverity(severity: 2)
                 print("New comment found. Added an entry at index \(cell.resultId!) in the Results Array")
+            }
+            else if (!isOn) {
+                cell.updateSeverity(severity: 0)
+                StateController.state.userRemovedResult(resultId: cell.resultId!)
+                cell.resultId = nil
             }
             
             // Show/hide comment addon buttons
@@ -186,9 +228,48 @@ class InspectionTableViewController: UITableViewController {
         }
     }
     
-    func refreshTable(notification: Notification) -> Void {
+    /* End of Cell Initialization Functions */
+    
+    
+    
+    /* Helper Functions */
+    
+    func refreshSection(notification: Notification) -> Void {
         print("Refreshing table")
+        let newSectionId = notification.object as! Int
+        self.sectionId = newSectionId
         self.tableView.reloadData()
+    }
+    
+    func refreshSubSection(notification: Notification) -> Void {
+        print("Refreshing Subsection")
+        
+        let changedSubSectionId = notification.object as! Int
+        /* Attempt at only inserting/deleting after the base cells
+        let changedSubSectionCell = notification.object as! SubSectionHeaderViewCell
+        let indexPath = self.tableView.indexPath(for: changedSubSectionCell)!
+        let baseCellOffset = 1 + BASE_NUM_COMMENTS
+        let numTotalCells = StateController.state.subsections[indexPath.section].commentIds.count
+        
+        var expandedCellIndexPaths = [IndexPath]()
+        
+        for cellIndex in baseCellOffset..<(numTotalCells - 1) {
+            expandedCellIndexPaths.append(IndexPath(row: cellIndex, section: indexPath.section))
+        }
+        
+        print("subsection \(indexPath.section) expanded? \(StateController.state.subsections[indexPath.section].isExpanded)")
+        
+        // isExpanded has already been toggled, refreshing section to show the change
+        if (StateController.state.subsections[indexPath.section].isExpanded) {
+            self.tableView.insertRows(at: expandedCellIndexPaths, with: .fade)
+        }
+        else {
+            self.tableView.deleteRows(at: expandedCellIndexPaths, with: .fade)
+        }
+        */
+        
+        self.tableView.reloadSections(IndexSet(integer: changedSubSectionId), with: .automatic)
+   
     }
     
     /* End of Helper Functions */
