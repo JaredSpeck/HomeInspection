@@ -89,11 +89,11 @@ class StateController {
         if (reusableResultIds.count > 0) {
             // Place result in one of the holes in the list
             returnId = reusableResultIds.popLast()!
-            results[returnId] = Result(id: returnId, inspectionId: getNextInspId(), commentId: commentId)
+            results[returnId] = Result(id: returnId, inspectionId: getNextInspId(), commentId: commentId, variantId: nil)
         }
         else {
             // Add result to the end of the list
-            results.append(Result(id: nextResultId, inspectionId: getNextInspId(), commentId: commentId))
+            results.append(Result(id: nextResultId, inspectionId: getNextInspId(), commentId: commentId, variantId: nil))
             returnId = nextResultId
             nextResultId += 1
         }
@@ -108,7 +108,7 @@ class StateController {
         let removedResult = results[resultId]
         let removedCommentId = removedResult!.commentId
         
-        comments[removedCommentId].resultId = nil
+        comments[removedCommentId!].resultId = nil
         
         // Add index of hole to reuasable id list
         reusableResultIds.append((Int(resultId)))
@@ -119,7 +119,7 @@ class StateController {
     
     // Adds one to the severity and modulo's the result by 3. Returns the new severity value
     func userChangedSeverity(resultId: Int) -> Int8 {
-        self.results[Int(resultId)]!.severity = ((self.results[Int(resultId)]!.severity + 1) % 2) + 1
+        self.results[Int(resultId)]!.severity = (self.results[Int(resultId)]!.severity % 2) + 1
         return self.results[resultId]!.severity
     }
     
@@ -162,7 +162,7 @@ class StateController {
         let currentSection = sections[sectionNum]
         let currentSubSection = subsections[currentSection.subSectionIds[subSectionNum]]
         
-        return currentSubSection.commentIds[rowNum - 1]
+        return currentSubSection.commentIds[rowNum - currentSubSection.variantIds.count - 1]
     }
     
     func getCommentState(commentId: Int) -> Bool {

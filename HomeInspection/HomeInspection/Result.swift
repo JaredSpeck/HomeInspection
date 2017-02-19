@@ -13,7 +13,8 @@ class Result {
     // Set on initialization (immutable)
     let id: Int
     let inspectionId: Int
-    let commentId: Int
+    let commentId: Int?
+    let variantId: Int?
     
     // Set when used (mutable)
     var severity: Int8
@@ -21,10 +22,11 @@ class Result {
     var photoPath: String?
     
     // Result initializer
-    init(id: Int, inspectionId: Int, commentId: Int) {
+    init(id: Int, inspectionId: Int, commentId: Int?, variantId: Int?) {
         self.id = id
         self.inspectionId = inspectionId
         self.commentId = commentId
+        self.variantId = variantId
         
         self.flags = nil
         self.photoPath = nil
