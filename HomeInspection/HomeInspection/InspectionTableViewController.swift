@@ -11,12 +11,12 @@ import UIKit
 
 
 protocol ResultDataDelegate {
-    func userAddedResult(commentId: Int32) -> Int32
-    func userRemovedResult(resultId: Int32) -> Int32
-    func userChangedSeverity(resultId: Int32) -> Int8
-    func userChangedNote(resultId: Int32, note: String) -> String
-    func userChangedPhoto(resultId: Int32, photoPath: String) -> String
-    func userChangedFlags(resultId: Int32, flagNums: [Int8]) -> [Int8]
+    func userAddedResult(commentId: Int) -> Int
+    func userRemovedResult(resultId: Int) -> Int
+    func userChangedSeverity(resultId: Int) -> Int8
+    func userChangedNote(resultId: Int, note: String) -> String
+    func userChangedPhoto(resultId: Int, photoPath: String) -> String
+    func userChangedFlags(resultId: Int, flagNums: [Int8]) -> [Int8]
 }
 
 
@@ -26,7 +26,7 @@ class InspectionTableViewController: UITableViewController {
     
     /* Properties */
     
-    let BASE_NUM_COMMENTS = 0
+    let BASE_NUM_COMMENTS = 4
     
     var sectionId: Int!
     var subSections = [SubSection]()
@@ -64,17 +64,23 @@ class InspectionTableViewController: UITableViewController {
 
     // REQUIRED: Set the number of sections in the table (= number of subsections for the chosen section)
     override func numberOfSections(in tableView: UITableView) -> Int {
-        // Return the number of sections (demo value for now)
-        return 4
+        // Return the number of sections (subsections in a given section)
+        return StateController.state.sections[sectionId!].subSectionIds.count
     }
 
     // REQUIRED: Set the number of rows per section (Comments in a subsection + 1 for the subsection header)
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        // Number of cells = number of comments + 1 (for the subsection header)
         var numCommentsShown = 1 + BASE_NUM_COMMENTS
-        let expandedNumCells = StateController.state.sections[section].subSectionIds.count
         
-        if (StateController.state.subsections[section].isExpanded) {
-            // Number of cells = number of comments + 1 (for the subsection header)
+        let state = StateController.state
+        let currentSection = state.sections[sectionId!]
+        let currentSubSection = state.subsections[currentSection.subSectionIds[section]]
+        let expandedNumCells = 1 + currentSubSection.commentIds.count
+        
+        if (state.subsections[section].isExpanded ||
+            expandedNumCells < numCommentsShown) {
+            
             numCommentsShown = expandedNumCells
         }
         
@@ -168,11 +174,8 @@ class InspectionTableViewController: UITableViewController {
         var commentText: String
         
         // Translates the cells location into a comment id
-        cell.commentId = state.getCommentId(sectionNum: 1, subSectionNum: section + 1, rowNum: row)!
-        // NOT ALL COMMENTS ARE IMPLEMENTED YET, IF NOT IMPLEMENTED, USING 0 FOR NOW
-        if (cell.commentId == -1) {
-            cell.commentId = 0
-        }
+        cell.commentId = state.getCommentId(sectionNum: sectionId!, subSectionNum: section, rowNum: row)!
+
         // Gets the status of the comment with id commentId from the comment table
         //cell.commentStatus.setOn(state.getCommentState(commentId: Int(cell.commentId!)), animated: false)
         
@@ -183,8 +186,14 @@ class InspectionTableViewController: UITableViewController {
         // Sets the cell to display text on more than one line
         cell.commentTextButton.titleLabel?.lineBreakMode = NSLineBreakMode.byWordWrapping
         
+        // NOT ALL COMMENTS ARE IMPLEMENTED YET, IF NOT IMPLEMENTED, USING 'ERROR' FOR NOW
         // Gets the plain comment text from the state controller
-        commentText = state.getCommentText(commentId: Int(cell.commentId!))
+        if (cell.commentId == -1) {
+            commentText = "ERROR"
+        }
+        else {
+            commentText = state.getCommentText(commentId: cell.commentId!)
+        }
         
         // Sets the comment text
         cell.commentTextButton.setAttributedTitle(NSMutableAttributedString(string: commentText, attributes: cell.commentTextAttributes), for: .normal)

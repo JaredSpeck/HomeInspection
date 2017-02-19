@@ -21,7 +21,7 @@ class SubSection {
     
     // MARK: - Initializer
     init!(subSectionId: Int!, name: String!, sectionId: Int!) {
-        print("Added subSeciton \(subSectionId!) to section: \(sectionId!)")
+        //print("Added subSeciton \(subSectionId!) to section: \(sectionId!)")
         
         
         // Initialize database loaded values

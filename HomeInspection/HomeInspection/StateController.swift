@@ -49,6 +49,7 @@ class StateController {
     // Mapping for section num, subsection num, and comment num in a subsection to a single commentId. NEED TO FIX MAPPING FUNCTION THAT FILLS THESE IN CORRECTLY
     private var commentIds = [[[Int]]]()
     
+    private var wasPullError: Bool = false
     private var dataIsInitialized: Bool = false
     private var reusableResultIds = [Int]()
     
@@ -61,11 +62,14 @@ class StateController {
         
         self.dataIsInitialized = false
         
+        // Add a null (id = 0) comment (its function TBD later, maybe errors?)
+        comments.append(Comment(commentId: 0, subSectionId: -1, rank: -1, commentText: "ERROR, COMMENT WITH ID 0", defaultFlags: [Int8](), active: false))
+        
         // Get and parse data from database
         pullFromUrl(option: DEFAULT_DATA)
         
         // Polling for completion of database pull and parsing. Simple, but semaphores may be more efficient design (save extra fraction of a second and no wake then sleep again)
-        while (!self.dataIsInitialized) {
+        while (!wasPullError && !self.dataIsInitialized) {
             sleep(1)
         }
     }
@@ -80,25 +84,39 @@ class StateController {
      */
     // Appends the results array with a new entry with the given comment id. Returns the result id of the new entry
     func userAddedResult(commentId: Int) -> Int {
-        results.append(Result(id: nextResultId, inspectionId: getNextInspId(), commentId: commentId))
         var returnId: Int
         
         if (reusableResultIds.count > 0) {
+            // Place result in one of the holes in the list
             returnId = reusableResultIds.popLast()!
+            results[returnId] = Result(id: returnId, inspectionId: getNextInspId(), commentId: commentId)
         }
         else {
+            // Add result to the end of the list
+            results.append(Result(id: nextResultId, inspectionId: getNextInspId(), commentId: commentId))
             returnId = nextResultId
             nextResultId += 1
         }
+        
+        comments[commentId].resultId = returnId
         
         return returnId
         
     }
     func userRemovedResult(resultId: Int) -> Void {
-        // Not sure what to return here for error checking yet. Removing might totally break array indexing as the array collapses down, but the ids dont update to match
+        
+        let removedResult = results[resultId]
+        let removedCommentId = removedResult!.commentId
+        
+        comments[removedCommentId].resultId = nil
+        
+        // Add index of hole to reuasable id list
         reusableResultIds.append((Int(resultId)))
+        
+        // Make a hole in the results list
         results[resultId] = nil
     }
+    
     // Adds one to the severity and modulo's the result by 3. Returns the new severity value
     func userChangedSeverity(resultId: Int) -> Int8 {
         self.results[Int(resultId)]!.severity = ((self.results[Int(resultId)]!.severity + 1) % 2) + 1
@@ -117,34 +135,8 @@ class StateController {
         return flagNums
     }
     
-    // Translates the cells location into a comment id
-    func getCommentId(sectionNum: Int, subSectionNum: Int, rowNum: Int) -> Int? {
-        print("Getting comment ID for cell in Section: \(sectionNum), Subsection \(subSectionNum), with Rank: \(rowNum)")
-        var section: Section
-        var subSection: SubSection
-        var comment: Comment
-        var commentId = -1
-        
-        if (sections.count > sectionNum) {
-            section = sections[sectionNum]
-            print("Found section \(section.sectionId!)")
-            if (section.subSectionIds.count > subSectionNum &&
-                subsections.count > section.subSectionIds[subSectionNum]) {
-                
-                subSection = subsections[section.subSectionIds[subSectionNum]]
-                print("Found subsection \(subSection.sectionId!)")
-                if (subSection.commentIds.count > rowNum &&
-                    comments.count > subSection.commentIds[rowNum]) {
-                    
-                    comment = comments[subSection.commentIds[rowNum]]
-                    commentId = comment.commentId!
-                    print("Found comment \(comment.commentId!)")
-                }
-            }
-        }
 
-        return commentId
-    }
+    
     
     // Get subsection cell information
     
@@ -163,11 +155,25 @@ class StateController {
     
     
     // Get comment cell information
+    
+    // Translates the cells location into a comment id
+    func getCommentId(sectionNum: Int, subSectionNum: Int, rowNum: Int) -> Int? {
+        //print("\nGetting comment ID for cell in Section: \(sectionNum), Subsection \(subSectionNum), with Rank: \(rowNum)")
+        let currentSection = sections[sectionNum]
+        let currentSubSection = subsections[currentSection.subSectionIds[subSectionNum]]
+        
+        return currentSubSection.commentIds[rowNum - 1]
+    }
+    
     func getCommentState(commentId: Int) -> Bool {
         return false//comments[commentId].active;
     }
     
     func getCommentText(commentId: Int) -> String {
+        //print("Accessing comment \(commentId)/\(comments.count)")
+        if (commentId >= comments.count) {
+            return "Error getting text for comment: Id \(commentId) out of range (\(comments.count))"
+        }
         return comments[commentId].commentText
     }
     
@@ -178,13 +184,10 @@ class StateController {
     }
     
     
-    
-    
-    
     // Add sections/subsections/comments during inspection
-    func addComment(newComment: Comment) {
-        self.comments.append(newComment)
-    }
+    //func addComment(newComment: Comment) {
+        //self.comments.append(newComment)
+    //}
     
     func addSubSection(newSubSection: SubSection) {
         self.subsections.append(newSubSection)
@@ -207,10 +210,6 @@ class StateController {
      * overwritten once the report is uploaded to the database
      * Returns a positive id if successfully assigned a permanent id in the database
      */
-    func mapCommentId(commentId: Int!, sectionNum: Int!, subSectionNum: Int!, rowNum: Int!) {
-        print("Mapping commentId: \(commentId!) to [\(sectionNum)][\(subSectionNum)][\(rowNum)]")
-        commentIds[sectionNum][subSectionNum][rowNum] = commentId;
-    }
     
     func getNextInspId() -> Int {
         // TODO: Implement later, for now always assigns the first slot in the local inspection cache
@@ -239,6 +238,7 @@ class StateController {
         
         guard let url = URL(string: endPointURL) else {
             print("Error: cannot create URL")
+            self.wasPullError = true
             return
         }
         let urlRequest = URLRequest(url: url)
@@ -250,10 +250,12 @@ class StateController {
             guard error == nil else {
                 print("error calling GET on option")
                 print(error!)
+                self.wasPullError = true
                 return
             }
             guard let responseData = data else {
                 print ("Error: did not recieve data")
+                self.wasPullError = true
                 return
             }
             do {
@@ -275,7 +277,6 @@ class StateController {
             }
         }
         task.resume()
-        
     }
     
     // TODO: Decide whether to do database surgery to fix 121 offset in subsection id or not
@@ -305,7 +306,7 @@ class StateController {
                         Comment(
                             commentId: commentJson["id"].intValue,
                             subSectionId: commentJson["subsec_id"].intValue - 121,
-                            rank: 0,
+                            rank: commentJson["rank"].intValue,
                             commentText: commentJson["comment"].string,
                             defaultFlags: [], //Fix this
                             active: commentJson["active"] == 1 ? true:false

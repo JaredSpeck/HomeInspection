@@ -18,17 +18,22 @@ class Comment {
     private(set) var rank: Int!
     private(set) var active: Bool! = false
     
+    var resultId: Int?
+    
     //MARK: Initialization
     init!(commentId: Int!, subSectionId: Int!, rank: Int!, commentText: String!, defaultFlags:[Int8]!, active: Bool? = false) {
  
-        print("Adding comment:\nId: \(commentId!)\nSubSectionId: \(subSectionId!)\nRank: \(rank!)\nText: \(commentText!)\n")
+        //print("Adding comment -> Id: \(commentId!), Text: \(commentText!)")
         
-        // Initialize comment properties
+        // Initialize database loaded values
         self.commentId = commentId
         self.subSectionId = subSectionId
         self.defaultFlags = defaultFlags
         self.commentText = commentText
         self.rank = rank
         self.active = active
+        
+        // Initialize app-specific values
+        self.resultId = nil;
     }
 }

@@ -29,7 +29,12 @@ class InspectionViewController: UIViewController {
     // Other Functions
     override func viewDidLoad() {
         super.viewDidLoad()
-        sectionLabel.text = StateController.state.sections[sectionId].sectionName
+        if (StateController.state.sections.count > sectionId) {
+            sectionLabel.text = StateController.state.sections[sectionId].sectionName
+        }
+        else {
+            sectionLabel.text = "Error Loading data"
+        }
         // Do any additional setup after loading the view.
     }
 
