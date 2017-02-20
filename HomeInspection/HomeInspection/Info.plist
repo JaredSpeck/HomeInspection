@@ -25,12 +25,12 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Allow application to access device&apos;s camera</string>
+	<string>Allow application to access device's camera</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow application to access photo library</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

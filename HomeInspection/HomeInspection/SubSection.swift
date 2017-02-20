@@ -17,6 +17,7 @@ class SubSection {
     
     // Application variables
     var commentIds: [Int]!
+    var variantIds: [Int]!
     var isExpanded: Bool = false
     
     // MARK: - Initializer
@@ -36,8 +37,18 @@ class SubSection {
         // Used for accessing id's of comments in this subsection
         self.commentIds = [Int]()
         
+        // Used for accessing id's of types in this subsection
+        self.variantIds = [Int]()
+        
         // Used to tell if a subsection has been expanded to view more than top X comments
         self.isExpanded = false
+        
+        loadSampleVariants()
+    }
+    
+    // loads variant ids with 2 dummy values for testing. Remove once database has variant entries
+    func loadSampleVariants() {
+         //variantIds.append(0)
     }
 
 }

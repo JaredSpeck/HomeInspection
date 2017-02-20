@@ -23,8 +23,11 @@
 		412FA1041E2715E200DE6BB9 /* StateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412FA1031E2715E200DE6BB9 /* StateController.swift */; };
 		412FA1121E271ABD00DE6BB9 /* LookupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412FA1111E271ABD00DE6BB9 /* LookupViewController.swift */; };
 		412FA1141E27200100DE6BB9 /* InspDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412FA1131E27200100DE6BB9 /* InspDetailsViewController.swift */; };
+		4148E2EA1E595D1B000ABF63 /* VariantViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4148E2E81E595D1B000ABF63 /* VariantViewCell.swift */; };
+		4148E2EB1E595D1B000ABF63 /* VariantViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4148E2E91E595D1B000ABF63 /* VariantViewCell.xib */; };
 		4172AE1D1E3EFA5300A8A80E /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4172AE1C1E3EFA5300A8A80E /* Result.swift */; };
 		4172AE1F1E3F3D4A00A8A80E /* InspectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4172AE1E1E3F3D4A00A8A80E /* InspectionViewController.swift */; };
+		419E6E601E5964B400F789C4 /* Variant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419E6E5F1E5964B400F789C4 /* Variant.swift */; };
 		41DF96FF1E46C76200950A87 /* PaneTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF96F91E46C76200950A87 /* PaneTableViewCell.swift */; };
 		41DF97001E46C76200950A87 /* PaneTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF96FA1E46C76200950A87 /* PaneTableViewController.swift */; };
 		41DF97021E46C76200950A87 /* PaneViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF96FC1E46C76200950A87 /* PaneViewCell.swift */; };
@@ -78,8 +81,11 @@
 		412FA1031E2715E200DE6BB9 /* StateController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateController.swift; sourceTree = "<group>"; };
 		412FA1111E271ABD00DE6BB9 /* LookupViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LookupViewController.swift; sourceTree = "<group>"; };
 		412FA1131E27200100DE6BB9 /* InspDetailsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspDetailsViewController.swift; sourceTree = "<group>"; };
+		4148E2E81E595D1B000ABF63 /* VariantViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VariantViewCell.swift; sourceTree = "<group>"; };
+		4148E2E91E595D1B000ABF63 /* VariantViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VariantViewCell.xib; sourceTree = "<group>"; };
 		4172AE1C1E3EFA5300A8A80E /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		4172AE1E1E3F3D4A00A8A80E /* InspectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectionViewController.swift; sourceTree = "<group>"; };
+		419E6E5F1E5964B400F789C4 /* Variant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Variant.swift; sourceTree = "<group>"; };
 		41DF96F91E46C76200950A87 /* PaneTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaneTableViewCell.swift; sourceTree = "<group>"; };
 		41DF96FA1E46C76200950A87 /* PaneTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaneTableViewController.swift; sourceTree = "<group>"; };
 		41DF96FC1E46C76200950A87 /* PaneViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaneViewCell.swift; sourceTree = "<group>"; };
@@ -220,6 +226,8 @@
 				41E047DF1E2805ED00E6804B /* InspectionTableViewController.swift */,
 				412C45331E3C4F5000D713D6 /* SubSectionHeaderViewCell.swift */,
 				412C45341E3C4F5000D713D6 /* SubSectionHeaderViewCell.xib */,
+				4148E2E81E595D1B000ABF63 /* VariantViewCell.swift */,
+				4148E2E91E595D1B000ABF63 /* VariantViewCell.xib */,
 				412C45371E3C51C800D713D6 /* CommentViewCell.swift */,
 				412C45381E3C51C800D713D6 /* CommentViewCell.xib */,
 			);
@@ -230,6 +238,7 @@
 			isa = PBXGroup;
 			children = (
 				41E047D21E27FCFB00E6804B /* Comment.swift */,
+				419E6E5F1E5964B400F789C4 /* Variant.swift */,
 				41E4E5621E2822630043B57F /* SubSection.swift */,
 				41072BC81E444991003D3A88 /* Section.swift */,
 				4172AE1C1E3EFA5300A8A80E /* Result.swift */,
@@ -359,6 +368,7 @@
 				412C45361E3C4F5000D713D6 /* SubSectionHeaderViewCell.xib in Resources */,
 				41243D531DF88AC5007747C3 /* Assets.xcassets in Resources */,
 				412C453A1E3C51C800D713D6 /* CommentViewCell.xib in Resources */,
+				4148E2EB1E595D1B000ABF63 /* VariantViewCell.xib in Resources */,
 				41243D511DF88AC5007747C3 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -391,6 +401,7 @@
 				41072BC91E444991003D3A88 /* Section.swift in Sources */,
 				41DF96FF1E46C76200950A87 /* PaneTableViewCell.swift in Sources */,
 				412C45391E3C51C800D713D6 /* CommentViewCell.swift in Sources */,
+				4148E2EA1E595D1B000ABF63 /* VariantViewCell.swift in Sources */,
 				4172AE1D1E3EFA5300A8A80E /* Result.swift in Sources */,
 				41E047C71E27F22900E6804B /* DashboardView.swift in Sources */,
 				412FA1041E2715E200DE6BB9 /* StateController.swift in Sources */,
@@ -406,6 +417,7 @@
 				41243D4C1DF88AC5007747C3 /* AppDelegate.swift in Sources */,
 				41E047E01E2805ED00E6804B /* InspectionTableViewController.swift in Sources */,
 				411F938C1E514A33008F4FA2 /* PhotoViewController.swift in Sources */,
+				419E6E601E5964B400F789C4 /* Variant.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -556,7 +568,7 @@
 				DEVELOPMENT_TEAM = HA29F8VU9D;
 				INFOPLIST_FILE = HomeInspection/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.Capstone.HomeInspection;
+				PRODUCT_BUNDLE_IDENTIFIER = com.capstone.HomeInspection;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};
@@ -572,7 +584,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = HomeInspection/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.Capstone.HomeInspection;
+				PRODUCT_BUNDLE_IDENTIFIER = com.capstone.HomeInspection;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;

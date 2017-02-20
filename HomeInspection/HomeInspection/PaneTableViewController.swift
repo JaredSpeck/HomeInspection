@@ -27,7 +27,7 @@ class PaneTableViewController: UITableViewController {
         
         // Remove selection highlighting
         paneCell.selectionStyle = UITableViewCellSelectionStyle.none
-        paneCell.sectionId = indexPath.row
+        paneCell.sectionId = indexPath.row + 1
         
         print("Created Cell with row: \(indexPath.row)")
         
@@ -39,10 +39,6 @@ class PaneTableViewController: UITableViewController {
         
         return paneCell
     }
-    
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 69 //hehe, nice
-    }
 
     
     override func viewDidLoad() {
@@ -51,11 +47,8 @@ class PaneTableViewController: UITableViewController {
         let pcell = UINib(nibName: "PaneViewCell", bundle: nil)
         tableView.register(pcell, forCellReuseIdentifier: "PaneViewCell")
         
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 64
     }
 
     override func didReceiveMemoryWarning() {

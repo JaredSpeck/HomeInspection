@@ -34,7 +34,7 @@ class PaneViewController: UIViewController {
         if (segue.identifier == "embedTableInPaneView") {
             let paneTableVC = segue.destination as! PaneTableViewController
             paneTableVC.inspectionVC = self.parentInpectionViewController
-            paneTableVC.numSections = isInspectionLoaded ? StateController.state.sections.count : 0
+            paneTableVC.numSections = isInspectionLoaded ? StateController.state.sections.count - 1 : 0
             print("Passing InspectionVC reference to embedded PaneTableVC")
         }
     }

@@ -20,6 +20,7 @@ class CommentViewCell: UITableViewCell {
         NSUnderlineStyleAttributeName : 0]
     
     @IBOutlet weak var commentStatus: UISwitch!
+    @IBOutlet weak var commentTextLabel: UILabel!
     @IBOutlet weak var commentTextButton: UIButton!
     @IBOutlet weak var commentNotesButton: UIButton!
     @IBOutlet weak var commentFlagsButton: UIButton!
@@ -58,10 +59,10 @@ class CommentViewCell: UITableViewCell {
     }
     
     // Changes comment text appearance based off of its severity (value passed in from the state controller)
-    func updateSeverity(severity: Int8) {
-        print("Updating view for result \(self.resultId!) to match severity \(severity)")
+    func updateSeverity(severity: Int) {
         
-        let oldText: String = (commentTextButton.titleLabel?.text)!
+        //let oldText: String = (commentTextButton.titleLabel?.text)!
+        let oldText: String = (commentTextLabel.text)!
         var newText: NSMutableAttributedString
         
         switch (severity) {
@@ -70,21 +71,24 @@ class CommentViewCell: UITableViewCell {
             commentTextAttributes[NSUnderlineStyleAttributeName] = 0
             commentTextAttributes[NSFontAttributeName] = UIFont.systemFont(ofSize: 16)
             newText = NSMutableAttributedString(string: oldText, attributes: commentTextAttributes)
-            commentTextButton.setAttributedTitle(newText, for: .normal)
+            //commentTextButton.setAttributedTitle(newText, for: .normal)
+            commentTextLabel.attributedText = newText
             break;
         case 1:
             // Low severity -> underline
             commentTextAttributes[NSUnderlineStyleAttributeName] = 1
             commentTextAttributes[NSFontAttributeName] = UIFont.systemFont(ofSize: 16)
             newText = NSMutableAttributedString(string: oldText, attributes: commentTextAttributes)
-            commentTextButton.setAttributedTitle(newText, for: .normal)
+            //commentTextButton.setAttributedTitle(newText, for: .normal)
+            commentTextLabel.attributedText = newText
             break;
         case 2:
             // High severity -> bold + underline
             commentTextAttributes[NSUnderlineStyleAttributeName] = 1
             commentTextAttributes[NSFontAttributeName] = UIFont.boldSystemFont(ofSize: 16)
             newText = NSMutableAttributedString(string: oldText, attributes: commentTextAttributes)
-            commentTextButton.setAttributedTitle(newText, for: .normal)
+            //commentTextButton.setAttributedTitle(newText, for: .normal)
+            commentTextLabel.attributedText = newText
             break;
         default:
             print("Comment with resultId \(self.resultId) updated with bad severity value \(severity)")

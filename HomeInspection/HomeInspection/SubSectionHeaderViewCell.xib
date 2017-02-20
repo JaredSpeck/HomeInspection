@@ -17,17 +17,17 @@
             <rect key="frame" x="0.0" y="0.0" width="1024" height="96"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
-                <rect key="frame" x="0.0" y="0.0" width="1024" height="96"/>
+                <rect key="frame" x="0.0" y="0.0" width="1024" height="95"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2Rv-ZM-bNA">
-                        <rect key="frame" x="0.0" y="0.0" width="1024" height="95.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="1024" height="87.5"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B0z-vb-k3I">
-                                <rect key="frame" x="0.0" y="0.0" width="228" height="95.5"/>
+                                <rect key="frame" x="0.0" y="0.0" width="267" height="87.5"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" numberOfLines="0" minimumFontSize="10" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pGI-5X-3Vw">
-                                        <rect key="frame" x="8" y="8" width="212" height="79.5"/>
+                                        <rect key="frame" x="8" y="8" width="251" height="71.5"/>
                                         <attributedString key="attributedText">
                                             <fragment content="SubSection">
                                                 <attributes>
@@ -49,17 +49,17 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2L1-cb-gWc">
-                                <rect key="frame" x="228" y="0.0" width="682" height="95.5"/>
+                                <rect key="frame" x="267" y="0.0" width="668" height="87.5"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="FVw-NF-NGZ">
-                                        <rect key="frame" x="8" y="0.0" width="666" height="95.5"/>
+                                        <rect key="frame" x="8" y="0.0" width="652" height="87.5"/>
                                         <subviews>
                                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1eY-FL-KbN">
-                                                <rect key="frame" x="0.0" y="32.5" width="51" height="31"/>
+                                                <rect key="frame" x="0.0" y="28.5" width="51" height="31"/>
                                                 <color key="onTintColor" red="0.0" green="0.39011696099999998" blue="0.78802083329999995" alpha="1" colorSpace="calibratedRGB"/>
                                             </switch>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status (placeholder)" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LK0-YZ-AuK">
-                                                <rect key="frame" x="69" y="37.5" width="597" height="20.5"/>
+                                                <rect key="frame" x="69" y="33.5" width="583" height="20.5"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                 <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
                                                 <nil key="highlightedColor"/>
@@ -76,16 +76,16 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="W0f-pd-LEr">
-                                <rect key="frame" x="910" y="0.0" width="114" height="95.5"/>
+                                <rect key="frame" x="935" y="0.0" width="89" height="87.5"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="S2W-ZX-YPy">
-                                        <rect key="frame" x="8" y="48.5" width="98" height="0.0"/>
+                                        <rect key="frame" x="8" y="44" width="73" height="0.0"/>
                                         <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                         <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="kPg-wt-zl5">
-                                        <rect key="frame" x="0.0" y="0.0" width="114" height="95.5"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="89" height="87.5"/>
                                         <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                         <state key="normal">
                                             <color key="titleColor" cocoaTouchSystemColor="lightTextColor"/>
@@ -108,14 +108,15 @@
                             </view>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="B0z-vb-k3I" firstAttribute="width" secondItem="2L1-cb-gWc" secondAttribute="width" multiplier="1:3" id="gJO-27-CcA"/>
-                            <constraint firstItem="B0z-vb-k3I" firstAttribute="width" secondItem="W0f-pd-LEr" secondAttribute="width" multiplier="2" id="qKG-Ld-ghV"/>
+                            <constraint firstItem="B0z-vb-k3I" firstAttribute="width" secondItem="2L1-cb-gWc" secondAttribute="width" multiplier="2:5" id="gJO-27-CcA"/>
+                            <constraint firstItem="B0z-vb-k3I" firstAttribute="width" secondItem="W0f-pd-LEr" secondAttribute="width" multiplier="3" id="qKG-Ld-ghV"/>
+                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="64" id="scU-vj-krS"/>
                         </constraints>
                     </stackView>
                 </subviews>
-                <color key="backgroundColor" cocoaTouchSystemColor="darkTextColor"/>
+                <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                 <constraints>
-                    <constraint firstAttribute="bottom" secondItem="2Rv-ZM-bNA" secondAttribute="bottom" id="6HE-0K-GQa"/>
+                    <constraint firstAttribute="bottomMargin" secondItem="2Rv-ZM-bNA" secondAttribute="bottom" id="6HE-0K-GQa"/>
                     <constraint firstAttribute="trailing" secondItem="2Rv-ZM-bNA" secondAttribute="trailing" id="gBC-TL-ePA"/>
                     <constraint firstItem="2Rv-ZM-bNA" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="qW2-pL-14n"/>
                     <constraint firstItem="2Rv-ZM-bNA" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="ty6-DB-Wrc"/>
