@@ -11,6 +11,7 @@ import UIKit
 class InspectionTableViewController: UITableViewController {
 
     
+    
     /* Properties */
     
     let BASE_NUM_COMMENTS = 3
@@ -37,8 +38,8 @@ class InspectionTableViewController: UITableViewController {
         let sscell = UINib(nibName: "SubSectionHeaderViewCell", bundle: nil)
         tableView.register(sscell, forCellReuseIdentifier: "SubSectionHeaderViewCell")
         
-        let tcell = UINib(nibName: "VariantViewCell", bundle: nil)
-        tableView.register(tcell, forCellReuseIdentifier: "VariantViewCell")
+        let vcell = UINib(nibName: "VariantViewCell", bundle: nil)
+        tableView.register(vcell, forCellReuseIdentifier: "VariantViewCell")
         
         let ccell = UINib(nibName: "CommentViewCell", bundle: nil)
         tableView.register(ccell, forCellReuseIdentifier: "CommentViewCell")
@@ -233,6 +234,7 @@ class InspectionTableViewController: UITableViewController {
         }
     }
     
+    // Loads result data from the state controller and returns it
     func loadResultData(resultId: Int, type: String) -> (Bool, String, Int) {
         if (type == "comment") {
             let result = StateController.state.results[resultId]!
@@ -261,6 +263,7 @@ class InspectionTableViewController: UITableViewController {
         }
     }
     
+    // Loads default data from the state controller and returns it
     func loadDefaultData(commentId: Int, type: String) -> String {
         if (type == "comment") {
             return StateController.state.comments[commentId].commentText!
@@ -280,7 +283,7 @@ class InspectionTableViewController: UITableViewController {
     
     
     
-    /* Helper Functions */
+    /* Notification Center Callback Functions */
     
     func refreshSection(notification: Notification) -> Void {
         print("Refreshing table")
@@ -320,7 +323,7 @@ class InspectionTableViewController: UITableViewController {
    
     }
     
-    /* End of Helper Functions */
+    /* End of Notification Center Callback Functions */
     
 
 }
