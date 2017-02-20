@@ -35,7 +35,7 @@ class StateController {
     // Arrays are indexed by their respective unique id's
     
     // List of inspection results with unique resultId
-    private var results = [Result?]()
+    private(set) var results = [Result?]()
     
     // List of all section names with unique sectionId
     private(set) var sections = [Section]()
@@ -47,7 +47,7 @@ class StateController {
     private(set) var comments = [Comment]()
     
     // Mapping for section num, subsection num, and comment num in a subsection to a single commentId. NEED TO FIX MAPPING FUNCTION THAT FILLS THESE IN CORRECTLY
-    private var commentIds = [[[Int]]]()
+    //private var commentIds = [[[Int]]]()
     
     private var wasPullError: Bool = false
     private var dataIsInitialized: Bool = false
@@ -68,10 +68,17 @@ class StateController {
         // Get and parse data from database
         pullFromUrl(option: DEFAULT_DATA)
         
+        
         // Polling for completion of database pull and parsing. Simple, but semaphores may be more efficient design (save extra fraction of a second and no wake then sleep again)
         while (!wasPullError && !self.dataIsInitialized) {
             sleep(1)
         }
+        
+        // Sort arrays so DB id matches index
+        sections = sections.sorted(by: {$0.sectionId < $1.sectionId})
+        subsections = subsections.sorted(by: {$0.subSectionId < $1.subSectionId})
+        comments = comments.sorted(by: {$0.commentId < $1.commentId})
+        
     }
     
     
@@ -118,7 +125,7 @@ class StateController {
     }
     
     // Adds one to the severity and modulo's the result by 3. Returns the new severity value
-    func userChangedSeverity(resultId: Int) -> Int8 {
+    func userChangedSeverity(resultId: Int) -> Int {
         self.results[Int(resultId)]!.severity = (self.results[Int(resultId)]!.severity % 2) + 1
         return self.results[resultId]!.severity
     }
@@ -158,15 +165,16 @@ class StateController {
     
     // Translates the cells location into a comment id
     func getCommentId(sectionNum: Int, subSectionNum: Int, rowNum: Int) -> Int? {
-        //print("\nGetting comment ID for cell in Section: \(sectionNum), Subsection \(subSectionNum), with Rank: \(rowNum)")
+        print("Getting comment ID for cell in Section: \(sectionNum), Subsection \(subSectionNum), with Rank: \(rowNum)")
         let currentSection = sections[sectionNum]
         let currentSubSection = subsections[currentSection.subSectionIds[subSectionNum]]
         
-        return currentSubSection.commentIds[rowNum - currentSubSection.variantIds.count - 1]
-    }
+        let commentIndex = rowNum - currentSubSection.variantIds.count
+        let commentId = currentSubSection.commentIds[commentIndex]
+        
+        print("\(commentId)/\(comments.count)")
     
-    func getCommentState(commentId: Int) -> Bool {
-        return false//comments[commentId].active;
+        return commentId
     }
     
     func getCommentText(commentId: Int) -> String {
@@ -183,19 +191,6 @@ class StateController {
         return subsections[subSectionId].sectionId
     }
     
-    
-    // Add sections/subsections/comments during inspection
-    //func addComment(newComment: Comment) {
-        //self.comments.append(newComment)
-    //}
-    
-    func addSubSection(newSubSection: SubSection) {
-        self.subsections.append(newSubSection)
-    }
-    
-    func addSection(newSection: Section) {
-        self.sections.append(newSection)
-    }
     // End of UI data transfer functions
     
     
@@ -279,7 +274,6 @@ class StateController {
         task.resume()
     }
     
-    // TODO: Decide whether to do database surgery to fix 121 offset in subsection id or not
     func parseDefaultData(json: JSON) {
         for (_, sectionJson) in json["sections"] {
             self.sections.append(
@@ -292,7 +286,7 @@ class StateController {
             for (_, subSectionJson) in sectionJson["subsections"] {
                 self.subsections.append(
                     SubSection(
-                        subSectionId: subSectionJson["id"].intValue - 121,
+                        subSectionId: subSectionJson["id"].intValue,
                         name: subSectionJson["name"].string,
                         sectionId: subSectionJson["sec_id"].intValue
                     )
@@ -305,7 +299,7 @@ class StateController {
                     self.comments.append(
                         Comment(
                             commentId: commentJson["id"].intValue,
-                            subSectionId: commentJson["subsec_id"].intValue - 121,
+                            subSectionId: commentJson["subsec_id"].intValue,
                             rank: commentJson["rank"].intValue,
                             commentText: commentJson["comment"].string,
                             defaultFlags: [], //Fix this

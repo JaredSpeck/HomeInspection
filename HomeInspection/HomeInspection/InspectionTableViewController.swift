@@ -13,8 +13,7 @@ class InspectionTableViewController: UITableViewController {
     
     /* Properties */
     
-    let BASE_NUM_COMMENTS = 2
-    
+    let BASE_NUM_COMMENTS = 3
     var sectionId: Int!
     var numReuses = 0
     
@@ -45,7 +44,7 @@ class InspectionTableViewController: UITableViewController {
         tableView.register(ccell, forCellReuseIdentifier: "CommentViewCell")
         
         tableView.rowHeight = UITableViewAutomaticDimension
-        tableView.estimatedRowHeight = 48
+        tableView.estimatedRowHeight = 64
     }
 
     // Function called when too much memory has been used
@@ -62,17 +61,14 @@ class InspectionTableViewController: UITableViewController {
 
     // REQUIRED: Set the number of rows per section 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // Number of cells = 1 + number of type cells + number of comments
-        var numCommentsShown = 1 + BASE_NUM_COMMENTS
-        
+        // Number of cells = number of variant cells + number of comments + 1 for subsection header
         let state = StateController.state
         let currentSection = state.sections[sectionId!]
         let currentSubSection = state.subsections[currentSection.subSectionIds[section]]
         let subSectionVariantCount = currentSubSection.variantIds.count
         let subSectionCommentCount = currentSubSection.commentIds.count
-        let expandedNumCells = 1 + subSectionVariantCount + subSectionCommentCount
-        
-        numCommentsShown += subSectionVariantCount
+        let expandedNumCells = subSectionVariantCount + subSectionCommentCount
+        var numCommentsShown = 1 + BASE_NUM_COMMENTS + subSectionVariantCount
         
         if (state.subsections[section].isExpanded || expandedNumCells < numCommentsShown) {
             numCommentsShown = expandedNumCells
@@ -165,41 +161,48 @@ class InspectionTableViewController: UITableViewController {
     func initCommentCell(cell: CommentViewCell, section: Int, row: Int) {
         let state = StateController.state
         var commentText: String
+        var commentStatus: Bool
+        var commentSeverity: Int
         
         // Translates the cells location into a comment id
-        cell.commentId = state.getCommentId(sectionNum: sectionId!, subSectionNum: section, rowNum: row)!
-
-        // Gets the status of the comment with id commentId from the comment table
-        //cell.commentStatus.setOn(state.getCommentState(commentId: Int(cell.commentId!)), animated: false)
+        let commentId = state.getCommentId(sectionNum: sectionId!, subSectionNum: section, rowNum: row)!
+        let resultId: Int? = state.comments[commentId].resultId
         
-        // Sets the comment addon button states based on the comment's status
-        cell.buttonHiddenWidths.priority = cell.commentStatus.isOn ? 250 : 900
-        cell.commentTextButton.isEnabled = cell.commentStatus.isOn
         
-        // Sets the cell to display text on more than one line
-        //cell.commentTextButton.titleLabel?.lineBreakMode = NSLineBreakMode.byWordWrapping
-        cell.commentTextLabel.lineBreakMode = NSLineBreakMode.byWordWrapping
-        
-        // NOT ALL COMMENTS ARE IMPLEMENTED YET, IF NOT IMPLEMENTED, USING 'ERROR' FOR NOW
-        // Gets the plain comment text from the state controller
-        if (cell.commentId == -1) {
-            commentText = "ERROR"
+        if (resultId != nil) {
+            // Load data from result entry in State controller
+            (commentStatus, commentText, commentSeverity) = loadResultData(resultId: resultId!, type: "comment")
         }
         else {
-            commentText = state.getCommentText(commentId: cell.commentId!)
+            // Load default cell data
+            commentText = loadDefaultData(commentId: commentId, type: "comment") //TODO
+            commentStatus = false
+            commentSeverity = 0
         }
         
+        // Set cell properties
+        cell.commentId = commentId
+        cell.commentStatus.setOn(commentStatus, animated: false)
+        cell.updateSeverity(severity: commentSeverity)
+        
+        // Sets the comment addon button states based on the comment's status
+        cell.buttonHiddenWidths.priority = commentStatus ? 250 : 900
+        cell.commentTextButton.isEnabled = commentStatus
+        
+        // Sets the cell to display text on more than one line
+        cell.commentTextLabel.lineBreakMode = NSLineBreakMode.byWordWrapping
+        
         // Sets the comment text
-        //cell.commentTextButton.setAttributedTitle(NSMutableAttributedString(string: commentText, attributes: cell.commentTextAttributes), for: .normal)
         cell.commentTextLabel.attributedText = NSMutableAttributedString(string: commentText, attributes: cell.commentTextAttributes)
         
         // Called when the comment status is toggled (or checked once we switch to checkboxes)
         cell.statusToggleAction = { (cell) in
             let isOn = cell.commentStatus.isOn
-            //let indexPath = self.tableView.indexPath(for: cell)
+            let resultId = StateController.state.comments[cell.commentId!].resultId
+            let indexPath = self.tableView.indexPath(for: cell)
             
             // Adding a newly checked comment to the result array
-            if (cell.resultId == nil && isOn) {
+            if (resultId == nil && isOn) {
                 // Need to assign a comment id to the cell first...
                 cell.resultId = StateController.state.userAddedResult(commentId: cell.commentId!)
                 let severity = StateController.state.userChangedSeverity(resultId: cell.resultId!)
@@ -208,7 +211,7 @@ class InspectionTableViewController: UITableViewController {
             }
             else if (!isOn) {
                 cell.updateSeverity(severity: 0)
-                StateController.state.userRemovedResult(resultId: cell.resultId!)
+                StateController.state.userRemovedResult(resultId: resultId!)
                 cell.resultId = nil
             }
             
@@ -216,15 +219,60 @@ class InspectionTableViewController: UITableViewController {
             cell.buttonHiddenWidths.priority = isOn ? 250 : 900
             cell.commentTextButton.isEnabled = isOn
             
-            // Wont work until loading from results table before default comment data
-            //self.tableView.reloadRows(at: [indexPath!], with: .right)
+            // Reload cell to account for text shifting due to presence of buttons
+            self.tableView.reloadRows(at: [indexPath!], with: .none)
         }
         
         // Called when the comment text is tapped (to increase severity)
         cell.commentTextButtonTapAction = { (commentCell) in
-            let newSeverity = (StateController.state.userChangedSeverity(resultId: commentCell.resultId!))
-            print("Comment Tapped, updating severity for result \(commentCell.resultId!) to \(newSeverity)")
+            let commentId = commentCell.commentId!
+            let comment = StateController.state.comments[commentId]
+            let newSeverity = StateController.state.userChangedSeverity(resultId: comment.resultId!)
+            print("Comment Tapped, updating severity for result \(comment.resultId!) to \(newSeverity)")
             commentCell.updateSeverity(severity: newSeverity)
+        }
+    }
+    
+    func loadResultData(resultId: Int, type: String) -> (Bool, String, Int) {
+        if (type == "comment") {
+            let result = StateController.state.results[resultId]!
+            let resultSeverity = result.severity
+            let commentText = StateController.state.comments[result.commentId!].commentText
+            let noteText = result.note
+            var fullText = ""
+            
+            if (commentText == "") {
+                fullText = noteText
+            }
+            else {
+                fullText = commentText! + " " + noteText
+            }
+            
+            return (true, fullText, resultSeverity)
+        }
+        else if (type == "variant") {
+            //TODO:
+            return (false, "", 0)
+        }
+        else {
+            print("Cannot load cell result data for type '\(type)'")
+            
+            return (false, "", 0)
+        }
+    }
+    
+    func loadDefaultData(commentId: Int, type: String) -> String {
+        if (type == "comment") {
+            return StateController.state.comments[commentId].commentText!
+        }
+        else if (type == "variant") {
+            //TODO:
+            return ""
+        }
+        else {
+            print("Cannot load cell default data for type '\(type)'")
+            
+            return ""
         }
     }
     
@@ -268,7 +316,7 @@ class InspectionTableViewController: UITableViewController {
         }
         */
         
-        self.tableView.reloadSections(IndexSet(integer: changedSubSectionId), with: .automatic)
+        self.tableView.reloadSections(IndexSet(integer: changedSubSectionId), with: .none)
    
     }
     

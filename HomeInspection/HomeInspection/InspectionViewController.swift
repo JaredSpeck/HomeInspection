@@ -13,7 +13,7 @@ class InspectionViewController: UIViewController {
     
     
     // Properties
-    var sectionId: Int! = 0
+    var sectionId: Int! = 1
     @IBOutlet weak var sectionLabel: UILabel!
     
     

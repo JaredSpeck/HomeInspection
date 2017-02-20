@@ -59,8 +59,7 @@ class CommentViewCell: UITableViewCell {
     }
     
     // Changes comment text appearance based off of its severity (value passed in from the state controller)
-    func updateSeverity(severity: Int8) {
-        print("Updating view for result \(self.resultId!) to match severity \(severity)")
+    func updateSeverity(severity: Int) {
         
         //let oldText: String = (commentTextButton.titleLabel?.text)!
         let oldText: String = (commentTextLabel.text)!

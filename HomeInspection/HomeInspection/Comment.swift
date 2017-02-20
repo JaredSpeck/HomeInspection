@@ -23,7 +23,7 @@ class Comment {
     //MARK: Initialization
     init!(commentId: Int!, subSectionId: Int!, rank: Int!, commentText: String!, defaultFlags:[Int8]!, active: Bool? = false) {
  
-        //print("Adding comment -> Id: \(commentId!), Text: \(commentText!)")
+        print("Adding comment \(commentId!) in subsec \(subSectionId!) Text: \(commentText!)")
         
         // Initialize database loaded values
         self.commentId = commentId

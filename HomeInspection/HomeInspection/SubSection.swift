@@ -48,7 +48,7 @@ class SubSection {
     
     // loads variant ids with 2 dummy values for testing. Remove once database has variant entries
     func loadSampleVariants() {
-        //variantIds.append(0)
+         //variantIds.append(0)
     }
 
 }

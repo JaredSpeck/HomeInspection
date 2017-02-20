@@ -17,7 +17,8 @@ class Result {
     let variantId: Int?
     
     // Set when used (mutable)
-    var severity: Int8
+    var note: String
+    var severity: Int
     var flags: [Int]?
     var photoPath: String?
     
@@ -28,6 +29,7 @@ class Result {
         self.commentId = commentId
         self.variantId = variantId
         
+        self.note = ""
         self.flags = nil
         self.photoPath = nil
         self.severity = 1;
