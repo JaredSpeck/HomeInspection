@@ -57,21 +57,23 @@ class InspectionTableViewController: UITableViewController {
     // REQUIRED: Set the number of sections in the table (= number of subsections for the chosen section)
     override func numberOfSections(in tableView: UITableView) -> Int {
         // Return the number of sections (subsections in a given section)
-        return StateController.state.sections[sectionId!].subSectionIds.count
+        let currentSection = StateController.state.sections[sectionId!]!
+        return currentSection.subSectionIds.count
     }
 
     // REQUIRED: Set the number of rows per section 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // Number of cells = number of variant cells + number of comments + 1 for subsection header
+        // Number of cells = number of variant cells + number of comments + 1 for subsection header - 1 for blank comment
         let state = StateController.state
-        let currentSection = state.sections[sectionId!]
-        let currentSubSection = state.subsections[currentSection.subSectionIds[section]]
+        let currentSection = state.sections[sectionId!]!
+        let currentSubSection = state.subsections[currentSection.subSectionIds[section]]!
+        
         let subSectionVariantCount = currentSubSection.variantIds.count
         let subSectionCommentCount = currentSubSection.commentIds.count
         let expandedNumCells = subSectionVariantCount + subSectionCommentCount
-        var numCommentsShown = 1 + BASE_NUM_COMMENTS + subSectionVariantCount
+        var numCommentsShown = 1 + BASE_NUM_COMMENTS + subSectionVariantCount - 1
         
-        if (state.subsections[section].isExpanded || expandedNumCells < numCommentsShown) {
+        if (currentSubSection.isExpanded || expandedNumCells < numCommentsShown) {
             numCommentsShown = expandedNumCells
         }
         
@@ -81,14 +83,16 @@ class InspectionTableViewController: UITableViewController {
     // REQUIRED: Initialize/Reuse table cells based on identifier
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
+        let subSectionIndex = indexPath.section
+        let variantCellCount = StateController.state.subsections[subSectionIndex + 1]!.variantIds.count
+        
         var identifier: String
         
         // Set identifier based off of row location
         if (indexPath.row == 0) {
             identifier = "SubSectionHeaderViewCell"
         }
-        else if (indexPath.row > 0 &&
-            indexPath.row <= StateController.state.subsections[indexPath.section].variantIds.count) {
+        else if (indexPath.row > 0 && indexPath.row <= variantCellCount) {
             identifier = "VariantViewCell"
         }
         else {
@@ -108,17 +112,17 @@ class InspectionTableViewController: UITableViewController {
         switch (identifier) {
         case "SubSectionHeaderViewCell":
             let subSectionCell = cell as! SubSectionHeaderViewCell
-            initSubSectionCell(cell: subSectionCell, subSection: indexPath.section)
+            initSubSectionCell(cell: subSectionCell, subSectionIndex: subSectionIndex)
             return subSectionCell
             
         case "VariantViewCell":
             let variantCell = cell as! VariantViewCell
-            initVariantCell(cell: variantCell, subSection: indexPath.section, row: indexPath.row)
+            initVariantCell(cell: variantCell, subSectionIndex: subSectionIndex, row: indexPath.row)
             return variantCell
             
         case "CommentViewCell":
             let commentCell = cell as! CommentViewCell
-            initCommentCell(cell: commentCell, section: indexPath.section, row: indexPath.row)
+            initCommentCell(cell: commentCell, subSectionIndex: subSectionIndex, row: indexPath.row + 1)
             return commentCell
             
         default:
@@ -134,40 +138,41 @@ class InspectionTableViewController: UITableViewController {
     /* Cell Initialization Functions */
     
     // Initializes subsection cells with values loaded from the state controller
-    func initSubSectionCell(cell: SubSectionHeaderViewCell, subSection: Int) {
+    func initSubSectionCell(cell: SubSectionHeaderViewCell, subSectionIndex: Int) {
         let state = StateController.state
+        let currentSubSection = state.subsections[subSectionIndex + 1]!
         
         // Set cell text
-        let subSectionText = state.getSubSectionText(sectionIndex: sectionId, subSectionNum: subSection)
+        let subSectionText = state.getSubSectionText(sectionId: sectionId, subSectionIndex: subSectionIndex)
         cell.subSectionLabel.text = subSectionText
         cell.subSectionStatusLabel.text = "All clear for \(subSectionText)"
-        cell.expandButtonLabel.text = (state.subsections[subSection].isExpanded ? "-" : "+")
+        cell.expandButtonLabel.text = (currentSubSection.isExpanded ? "-" : "+")
         
         // Set expand button function
         cell.expandButtonTapAction = { (cell) in
-            let isExpanded = state.subsections[subSection].isExpanded
+            let isExpanded = currentSubSection.isExpanded
             //print("Setting subsection \(subSection) expansion to \(!isExpanded)")
-            state.subsections[subSection].isExpanded = !isExpanded
-            NotificationCenter.default.post(name: Notification.Name(rawValue: "refreshSubSection"), object: subSection)
+            currentSubSection.isExpanded = !isExpanded
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "refreshSubSection"), object: subSectionIndex + 1)
         }
         
     }
     
     // Initialize a type cell with values loaded from state controller
-    func initVariantCell(cell: VariantViewCell, subSection: Int, row: Int) {
+    func initVariantCell(cell: VariantViewCell, subSectionIndex: Int, row: Int) {
         //let state = StateController.state
     }
     
     // Initializes comment cells with values loaded from the state controller
-    func initCommentCell(cell: CommentViewCell, section: Int, row: Int) {
+    func initCommentCell(cell: CommentViewCell, subSectionIndex: Int, row: Int) {
         let state = StateController.state
         var commentText: String
         var commentStatus: Bool
         var commentSeverity: Int
         
         // Translates the cells location into a comment id
-        let commentId = state.getCommentId(sectionNum: sectionId!, subSectionNum: section, rowNum: row)!
-        let resultId: Int? = state.comments[commentId].resultId
+        let commentId = state.getCommentId(sectionId: sectionId!, subSectionIndex: subSectionIndex, rowNum: row)!
+        let resultId: Int? = state.comments[commentId]!.resultId
         
         
         if (resultId != nil) {
@@ -199,7 +204,7 @@ class InspectionTableViewController: UITableViewController {
         // Called when the comment status is toggled (or checked once we switch to checkboxes)
         cell.statusToggleAction = { (cell) in
             let isOn = cell.commentStatus.isOn
-            let resultId = StateController.state.comments[cell.commentId!].resultId
+            let resultId = StateController.state.comments[cell.commentId!]!.resultId
             let indexPath = self.tableView.indexPath(for: cell)
             
             // Adding a newly checked comment to the result array
@@ -227,7 +232,7 @@ class InspectionTableViewController: UITableViewController {
         // Called when the comment text is tapped (to increase severity)
         cell.commentTextButtonTapAction = { (commentCell) in
             let commentId = commentCell.commentId!
-            let comment = StateController.state.comments[commentId]
+            let comment = StateController.state.comments[commentId]!
             let newSeverity = StateController.state.userChangedSeverity(resultId: comment.resultId!)
             print("Comment Tapped, updating severity for result \(comment.resultId!) to \(newSeverity)")
             commentCell.updateSeverity(severity: newSeverity)
@@ -239,7 +244,7 @@ class InspectionTableViewController: UITableViewController {
         if (type == "comment") {
             let result = StateController.state.results[resultId]!
             let resultSeverity = result.severity
-            let commentText = StateController.state.comments[result.commentId!].commentText
+            let commentText = StateController.state.comments[result.commentId!]!.commentText
             let noteText = result.note
             var fullText = ""
             
@@ -266,7 +271,7 @@ class InspectionTableViewController: UITableViewController {
     // Loads default data from the state controller and returns it
     func loadDefaultData(commentId: Int, type: String) -> String {
         if (type == "comment") {
-            return StateController.state.comments[commentId].commentText!
+            return StateController.state.comments[commentId]!.commentText!
         }
         else if (type == "variant") {
             //TODO:
@@ -319,7 +324,7 @@ class InspectionTableViewController: UITableViewController {
         }
         */
         
-        self.tableView.reloadSections(IndexSet(integer: changedSubSectionId), with: .none)
+        self.tableView.reloadSections(IndexSet(integer: changedSubSectionId - 1), with: .none)
    
     }
     

@@ -29,9 +29,9 @@ class PaneTableViewController: UITableViewController {
         paneCell.selectionStyle = UITableViewCellSelectionStyle.none
         paneCell.sectionId = indexPath.row + 1
         
-        print("Created Cell with row: \(indexPath.row)")
+        print("Section cell created for sectionId \(indexPath.row + 1)")
         
-        paneCell.sectionLabel.text = StateController.state.sections[paneCell.sectionId].sectionName
+        paneCell.sectionLabel.text = StateController.state.sections[paneCell.sectionId]!.sectionName
         
         paneCell.sectionButtonTapAction = { (cell) in
             self.inspectionVC!.loadSection(sectionId: paneCell.sectionId!)
