@@ -38,13 +38,13 @@ class StateController {
     private(set) var results = [Result?]()
     
     // List of all section names with unique sectionId
-    private(set) var sections = [Section]()
+    private(set) var sections = Dictionary<Int, Section>()
     
     // List of all subsection names with unique subSectionId
-    private(set) var subsections = [SubSection]()
+    private(set) var subsections = Dictionary<Int, SubSection>()
     
     // List of all comments with unique commentId
-    private(set) var comments = [Comment]()
+    private(set) var comments = Dictionary<Int, Comment>()
     
     // Mapping for section num, subsection num, and comment num in a subsection to a single commentId. NEED TO FIX MAPPING FUNCTION THAT FILLS THESE IN CORRECTLY
     //private var commentIds = [[[Int]]]()
@@ -63,7 +63,7 @@ class StateController {
         self.dataIsInitialized = false
         
         // Add a null (id = 0) comment (its function TBD later, maybe errors?)
-        comments.append(Comment(commentId: 0, subSectionId: -1, rank: -1, commentText: "ERROR, COMMENT WITH ID 0", defaultFlags: [Int8](), active: false))
+        //comments.append(Comment(commentId: 0, subSectionId: -1, rank: -1, commentText: "ERROR, COMMENT WITH ID 0", defaultFlags: [Int8](), active: false))
         
         // Get and parse data from database
         pullFromUrl(option: DEFAULT_DATA)
@@ -73,11 +73,6 @@ class StateController {
         while (!wasPullError && !self.dataIsInitialized) {
             sleep(1)
         }
-        
-        // Sort arrays so DB id matches index
-        sections = sections.sorted(by: {$0.sectionId < $1.sectionId})
-        subsections = subsections.sorted(by: {$0.subSectionId < $1.subSectionId})
-        comments = comments.sorted(by: {$0.commentId < $1.commentId})
         
     }
     
@@ -105,7 +100,7 @@ class StateController {
             nextResultId += 1
         }
         
-        comments[commentId].resultId = returnId
+        comments[commentId]!.resultId = returnId
         
         return returnId
         
@@ -115,10 +110,10 @@ class StateController {
         let removedResult = results[resultId]
         let removedCommentId = removedResult!.commentId
         
-        comments[removedCommentId!].resultId = nil
+        comments[removedCommentId!]!.resultId = nil
         
         // Add index of hole to reuasable id list
-        reusableResultIds.append((Int(resultId)))
+        reusableResultIds.append(resultId)
         
         // Make a hole in the results list
         results[resultId] = nil
@@ -126,19 +121,22 @@ class StateController {
     
     // Adds one to the severity and modulo's the result by 3. Returns the new severity value
     func userChangedSeverity(resultId: Int) -> Int {
-        self.results[Int(resultId)]!.severity = (self.results[Int(resultId)]!.severity % 2) + 1
+        self.results[resultId]!.severity = (self.results[resultId]!.severity % 2) + 1
         return self.results[resultId]!.severity
     }
     
     func userChangedNote(resultId: Int, note: String) -> String {
+        print("Note for \(resultId)")
         return note
     }
     
     func userChangedPhoto(resultId: Int, photoPath: String) -> String {
+        print("Photo for \(resultId)")
         return photoPath
     }
     
     func userChangedFlags(resultId: Int, flagNums: [Int8]) -> [Int8] {
+        print("Flags for \(resultId)")
         return flagNums
     }
     
@@ -147,31 +145,25 @@ class StateController {
     
     // Get subsection cell information
     
-    func getSubSectionText(sectionIndex: Int, subSectionNum: Int) -> String {
-        let section = self.sections[sectionIndex]
-        let subSectionId = section.subSectionIds[subSectionNum]
+    func getSubSectionText(sectionId: Int, subSectionIndex: Int) -> String {
+        let currentSection = self.sections[sectionId]!
+        let subSectionId = currentSection.subSectionIds[subSectionIndex]
         
-        for index in 0..<subsections.count {
-            if (subsections[index].subSectionId == subSectionId) {
-                return subsections[index].subSectionName!
-            }
-        }
-        
-        return "Not Found"
+        return subsections[subSectionId]!.subSectionName!
     }
     
     
     // Get comment cell information
     
     // Translates the cells location into a comment id
-    func getCommentId(sectionNum: Int, subSectionNum: Int, rowNum: Int) -> Int? {
-        print("Getting comment ID for cell in Section: \(sectionNum), Subsection \(subSectionNum), with Rank: \(rowNum)")
-        let currentSection = sections[sectionNum]
-        let currentSubSection = subsections[currentSection.subSectionIds[subSectionNum]]
+    func getCommentId(sectionId: Int, subSectionIndex: Int, rowNum: Int) -> Int? {
+        let currentSection = sections[sectionId]!
+        let currentSubSection = subsections[currentSection.subSectionIds[subSectionIndex]]!
         
-        let commentIndex = rowNum - currentSubSection.variantIds.count
+        let commentIndex = rowNum - currentSubSection.variantIds.count - 1
         let commentId = currentSubSection.commentIds[commentIndex]
         
+        print("Getting comment ID for cell in Section: \(sectionId), Subsection \(subSectionIndex + 1), with Rank: \(commentIndex + 1)")
         print("\(commentId)/\(comments.count)")
     
         return commentId
@@ -182,13 +174,13 @@ class StateController {
         if (commentId >= comments.count) {
             return "Error getting text for comment: Id \(commentId) out of range (\(comments.count))"
         }
-        return comments[commentId].commentText
+        return comments[commentId]!.commentText
     }
     
     func getSection(subSectionId: Int) -> Int {
         print("getting section for subsection \(subSectionId)")
         
-        return subsections[subSectionId].sectionId
+        return subsections[subSectionId]!.sectionId
     }
     
     // End of UI data transfer functions
@@ -276,39 +268,39 @@ class StateController {
     
     func parseDefaultData(json: JSON) {
         for (_, sectionJson) in json["sections"] {
-            self.sections.append(
-                Section(
+            let sectionId = sectionJson["id"].intValue
+            
+            self.sections[sectionId] = Section(
                     id: sectionJson["id"].intValue,
                     name: sectionJson["name"].string
-                )
             )
             
             for (_, subSectionJson) in sectionJson["subsections"] {
-                self.subsections.append(
-                    SubSection(
+                let subSectionId = subSectionJson["id"].intValue
+                
+                self.subsections[subSectionId] = SubSection(
                         subSectionId: subSectionJson["id"].intValue,
                         name: subSectionJson["name"].string,
                         sectionId: subSectionJson["sec_id"].intValue
-                    )
                 )
                 
                 // Add subsec id to section's subsec list
-                self.sections.last!.subSectionIds.append(subsections.last!.subSectionId)
+                self.sections[sectionId]!.subSectionIds.append(subSectionId)
                 
                 for (_, commentJson) in subSectionJson["comments"] {
-                    self.comments.append(
-                        Comment(
+                    let commentId = commentJson["id"].intValue
+                    
+                    self.comments[commentId] = Comment(
                             commentId: commentJson["id"].intValue,
                             subSectionId: commentJson["subsec_id"].intValue,
                             rank: commentJson["rank"].intValue,
                             commentText: commentJson["comment"].string,
                             defaultFlags: [], //Fix this
                             active: commentJson["active"] == 1 ? true:false
-                        )
                     )
                     
                     // Add comment id to subsection's comment list
-                    self.subsections.last!.commentIds.append(comments.last!.commentId)
+                    self.subsections[subSectionId]!.commentIds.append(commentId)
                 }
             }
         }

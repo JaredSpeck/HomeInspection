@@ -19,7 +19,7 @@ class InspectionViewController: UIViewController {
     
     
     func loadSection(sectionId: Int) {
-        let newSection = StateController.state.sections[sectionId]
+        let newSection = StateController.state.sections[sectionId]!
         sectionLabel.text = newSection.sectionName
         
         // ADD CODE TO LOAD SECTION/SUBSECTION/COMMENTS
@@ -30,7 +30,7 @@ class InspectionViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         if (StateController.state.sections.count > sectionId) {
-            sectionLabel.text = StateController.state.sections[sectionId].sectionName
+            sectionLabel.text = StateController.state.sections[sectionId]!.sectionName
         }
         else {
             sectionLabel.text = "Error Loading data"
