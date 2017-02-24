@@ -158,7 +158,7 @@ class InspectionTableViewController: UITableViewController {
         
     }
     
-    // Initialize a type cell with values loaded from state controller
+    // Initialize variant cells with values loaded from state controller
     func initVariantCell(cell: VariantViewCell, subSectionIndex: Int, row: Int) {
         //let state = StateController.state
     }
@@ -299,31 +299,7 @@ class InspectionTableViewController: UITableViewController {
     
     func refreshSubSection(notification: Notification) -> Void {
         print("Refreshing Subsection")
-        
         let changedSubSectionId = notification.object as! Int
-        /* Attempt at only inserting/deleting after the base cells
-        let changedSubSectionCell = notification.object as! SubSectionHeaderViewCell
-        let indexPath = self.tableView.indexPath(for: changedSubSectionCell)!
-        let baseCellOffset = 1 + BASE_NUM_COMMENTS
-        let numTotalCells = StateController.state.subsections[indexPath.section].commentIds.count
-        
-        var expandedCellIndexPaths = [IndexPath]()
-        
-        for cellIndex in baseCellOffset..<(numTotalCells - 1) {
-            expandedCellIndexPaths.append(IndexPath(row: cellIndex, section: indexPath.section))
-        }
-        
-        print("subsection \(indexPath.section) expanded? \(StateController.state.subsections[indexPath.section].isExpanded)")
-        
-        // isExpanded has already been toggled, refreshing section to show the change
-        if (StateController.state.subsections[indexPath.section].isExpanded) {
-            self.tableView.insertRows(at: expandedCellIndexPaths, with: .fade)
-        }
-        else {
-            self.tableView.deleteRows(at: expandedCellIndexPaths, with: .fade)
-        }
-        */
-        
         self.tableView.reloadSections(IndexSet(integer: changedSubSectionId - 1), with: .none)
    
     }

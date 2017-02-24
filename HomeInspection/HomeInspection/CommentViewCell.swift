@@ -67,9 +67,9 @@ class CommentViewCell: UITableViewCell {
         
         switch (severity) {
         case 0:
-            // Low severity -> underline
+            // No severity -> plain
             commentTextAttributes[NSUnderlineStyleAttributeName] = 0
-            commentTextAttributes[NSFontAttributeName] = UIFont.systemFont(ofSize: 16)
+            commentTextAttributes[NSFontAttributeName] = UIFont(name: "Gill Sans", size: 18)
             newText = NSMutableAttributedString(string: oldText, attributes: commentTextAttributes)
             //commentTextButton.setAttributedTitle(newText, for: .normal)
             commentTextLabel.attributedText = newText
@@ -77,7 +77,7 @@ class CommentViewCell: UITableViewCell {
         case 1:
             // Low severity -> underline
             commentTextAttributes[NSUnderlineStyleAttributeName] = 1
-            commentTextAttributes[NSFontAttributeName] = UIFont.systemFont(ofSize: 16)
+            commentTextAttributes[NSFontAttributeName] = UIFont(name: "Gill Sans", size: 18)
             newText = NSMutableAttributedString(string: oldText, attributes: commentTextAttributes)
             //commentTextButton.setAttributedTitle(newText, for: .normal)
             commentTextLabel.attributedText = newText
@@ -85,7 +85,7 @@ class CommentViewCell: UITableViewCell {
         case 2:
             // High severity -> bold + underline
             commentTextAttributes[NSUnderlineStyleAttributeName] = 1
-            commentTextAttributes[NSFontAttributeName] = UIFont.boldSystemFont(ofSize: 16)
+            commentTextAttributes[NSFontAttributeName] = UIFont(name: "Gill Sans-bold", size: 16)
             newText = NSMutableAttributedString(string: oldText, attributes: commentTextAttributes)
             //commentTextButton.setAttributedTitle(newText, for: .normal)
             commentTextLabel.attributedText = newText

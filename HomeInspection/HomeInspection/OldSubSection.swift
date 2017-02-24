@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SubSection {
+class OldSubSection {
 
     // Database variables
     var subSectionId: Int!
