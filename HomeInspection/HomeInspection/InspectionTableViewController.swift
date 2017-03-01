@@ -14,7 +14,7 @@ class InspectionTableViewController: UITableViewController {
     
     /* Properties */
     
-    let BASE_NUM_COMMENTS = 3
+    let BASE_NUM_COMMENTS = 5
     var sectionId: Int!
     var numReuses = 0
     
@@ -79,7 +79,7 @@ class InspectionTableViewController: UITableViewController {
         
         return numCommentsShown
     }
-
+    
     // REQUIRED: Initialize/Reuse table cells based on identifier
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
@@ -160,8 +160,271 @@ class InspectionTableViewController: UITableViewController {
     
     // Initialize a type cell with values loaded from state controller
     func initVariantCell(cell: VariantViewCell, subSectionIndex: Int, row: Int) {
-        //let state = StateController.state
+        let state = StateController.state
+        var formatString: String = state.getVariantString()
+        
+        // Parses format string and initialized cell with
+        //parse(string: formatString, cell)
+        getType(string: &formatString, varC: cell)
+        print("Afer Type: \(formatString)")
+        if(cell.type == 0){
+            getVariantLabel(string: &formatString, varC: cell)
+            print("After removing label: \(formatString)")
+            getnumFlags(string: &formatString, varC: cell)
+            print("Num flags: \(cell.numFlag)")
+            print("After removing numFlags: \(formatString)")
+            getFlags(string: &formatString, varC: cell)
+            print("After GetFlag: \(formatString)")
+            getFlagStates(string: &formatString, varC: cell)
+            print("After GetFlagV: \(formatString)")
+        }
+        else{
+            getVariantLabel(string: &formatString, varC: cell)
+            getVariantValue(string: &formatString, varC: cell)
+            getVariantExtra(string: &formatString, varC: cell)
+        }
+        
+        
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    /* BLEJHRKEHTGENP */
+    
+    //This function gets the type either radio or fill in and marks the vCell type accordingly.
+    //Using the removeSubrange the string is edited to remove the first part of the string
+    func getType(string: inout String, varC: VariantViewCell){
+        if (string[string.startIndex] == "r")
+        {
+            varC.type = 0
+            varC.showTextField.priority = 250
+            varC.showRadioField.priority = 900
+        }
+        else if (string[string.startIndex] == "f")
+        {
+            varC.type = 1
+            varC.showTextField.priority = 900
+            varC.showRadioField.priority = 250
+        }
+        let range = string.startIndex..<string.index(string.startIndex, offsetBy: 2)
+        string.removeSubrange(range)
+        
+    }
+    
+    //This function gets the first text field from the database that will go in front. It gets the index of the next semicolon
+    // gets the indexes around it, then using that info makes a range to copy the field into Vcell’s dbText field
+    //Using the removeSubrange the main string is edited to remove the first part of the string
+    func getVariantLabel(string: inout String, varC: VariantViewCell){
+        let c = string.characters
+        let indexS = c.index(of: ";")!
+        let indexAfterS = c.index(after: indexS)
+        
+        if (varC.type == 0) {
+            print("Changed Label for 0 type")
+            varC.nameTextField.text = string[string.startIndex..<indexS]
+        }
+        else {
+            print("Changed Label for 1 type")
+            varC.labelTextField.text = string[string.startIndex..<indexS]
+        }
+        
+        let range = string.startIndex..<indexAfterS
+        string.removeSubrange(range)
+    }
+    //Function gets the number of flags for a radio format, gets the index of next semicolon
+    // gets the indexes around it, then using that info makes a range to copy the field and convert to Int
+    // value is then placed in Vcells numFlag value
+    //Using the removeSubrange the main string is edited to remove the first part of the string
+    func getnumFlags(string: inout String, varC: VariantViewCell){
+        let c = string.characters
+        let indexS = c.index(of: ";")!
+        let indexAfterS = c.index(after: indexS)
+        var temp: String?
+        temp = string[string.startIndex..<indexS]
+        
+        
+        let number = Int(temp!)!
+        varC.numFlag = number
+        
+        let range = string.startIndex..<indexAfterS
+        string.removeSubrange(range)
+    }
+    //Function gets the flag names for a radio format, gets the index of next semicolon
+    // gets the indexes around it, then using that info makes a range to copy the field
+    // value is then placed in Vcells flag1-flag8 value
+    //Using the removeSubrange the main string is edited to remove the first part of the string
+    //This repeats in a for loop using num Flags as a condition goes up from 1 to 8
+    func getFlags(string: inout String, varC: VariantViewCell){
+        let c = string.characters
+        let indexS = c.index(of: ";")!
+        let indexAfterS = c.index(after: indexS)
+        
+        varC.updateRadioPriorities(numButtons: varC.numFlag)
+        
+        for index in 1...varC.numFlag {
+            
+            switch index{
+            case 1:
+                varC.flag1TextField.text = string[string.startIndex..<indexS]
+            case 2:
+                varC.flag2TextField.text = string[string.startIndex..<indexS]
+            case 3:
+                varC.flag3TextField.text = string[string.startIndex..<indexS]
+            case 4:
+                varC.flag4TextField.text = string[string.startIndex..<indexS]
+            case 5:
+                varC.flag5TextField.text = string[string.startIndex..<indexS]
+            case 6:
+                varC.flag6TextField.text = string[string.startIndex..<indexS]
+            case 7:
+                varC.flag7TextField.text = string[string.startIndex..<indexS]
+            case 8:
+                varC.flag8TextField.text = string[string.startIndex..<indexS]
+            default:
+                print("NumFlag was not between 1 and 8 was \(varC.numFlag)")
+            }
+            let range = string.startIndex..<indexAfterS
+            string.removeSubrange(range)
+        }
+    }
+    //Function gets the flag starting values for a radio format, gets the index of next semicolon
+    // gets the indexes around it, then using that info makes a range to copy the field
+    // value is then placed in Vcells flag1-flag8 value
+    //Using the removeSubrange the main string is edited to remove the first part of the string
+    //This repeats in a for loop using num Flags as a condition goes up from 1 to 8
+    
+    func getFlagStates(string: inout String, varC: VariantViewCell){
+        let c = string.characters
+        let indexS = c.index(of: ";")!
+        let indexAfterS = c.index(after: indexS)
+        for index in 1...varC.numFlag {
+                switch index{
+                case 1:
+                    varC.flag1Switch.setOn(string[string.startIndex] == "1" ? true : false, animated: false)
+                case 2:
+                    varC.flag2Switch.setOn(string[string.startIndex] == "1" ? true : false, animated: false)
+                case 3:
+                    varC.flag3Switch.setOn(string[string.startIndex] == "1" ? true : false, animated: false)
+                case 4:
+                    varC.flag4Switch.setOn(string[string.startIndex] == "1" ? true : false, animated: false)
+                case 5:
+                    varC.flag5Switch.setOn(string[string.startIndex] == "1" ? true : false, animated: false)
+                case 6:
+                    varC.flag6Switch.setOn(string[string.startIndex] == "1" ? true : false, animated: false)
+                case 7:
+                    varC.flag7Switch.setOn(string[string.startIndex] == "1" ? true : false, animated: false)
+                case 8:
+                    varC.flag8Switch.setOn(string[string.startIndex] == "1" ? true : false, animated: false)
+                default:
+                    print("NumFlag was not between 1 and 8 was \(varC.numFlag)")
+                }
+            let range = string.startIndex..<indexAfterS
+            string.removeSubrange(range)
+        }
+    }
+    
+    //Function gets starting text for the fill in, gets the index of the next semicolon
+    // gets the indexes around it, then using that info makes a range to copy the field
+    // value is then placed in Vcells User Text string
+    //Using the removeSubrange the main string is edited to remove the first part of the string
+    func getVariantValue(string: inout String, varC: VariantViewCell){
+        let c = string.characters
+        let indexS = c.index(of: ";")!
+        let indexAfterS = c.index(after: indexS)
+        
+        varC.valueTextField.text = string[string.startIndex..<indexS]
+        
+        let range = string.startIndex..<indexAfterS
+        string.removeSubrange(range)
+    }
+    
+    //Function gets end Text for fill in, gets the index of the next semicolon
+    // gets the indexes around it, then using that info makes a range to copy the field
+    // value is then placed in Vcells DBText string
+    //Using the removeSubrange the main string is edited to remove the first part of the string
+    
+    func getVariantExtra(string: inout String, varC: VariantViewCell){
+        let c = string.characters
+        let indexS = c.index(of: ";")!
+        let indexAfterS = c.index(after: indexS)
+        
+        varC.extraTextField.text = string[string.startIndex..<indexS]
+        
+        let range = string.startIndex..<indexAfterS
+        string.removeSubrange(range)
+    }
+    
+    //Function uses the fields in Vcell and creates the radio and fill in string format
+    // where each field ends with a semicolon use NumFlag and type in Vcell the
+    // function determines which case is appropriate for the data
+    /*func compose(string: inout String, varC: VariantViewCell){
+        if(varC.type == 1){
+            switch varC.numFlag{
+            case 1:
+                string = "r;\(varC.dbText!);\(varC.numFlag);\(varC.flag1!);\(varC.flagV1);"
+            case 2:
+                string = "r;\(varC.dbText!);\(varC.numFlag);\(varC.flag1!);\(varC.flag2!);\(varC.flagV1);\(varC.flagV2);"
+            case 3:
+                string = "r;\(varC.dbText!);\(varC.numFlag);\(varC.flag1!);\(varC.flag2!);\(varC.flag3!);\(varC.flagV1);\(varC.flagV2);\(varC.flagV3);"
+            case 4:
+                string = "r;\(varC.dbText!);\(varC.numFlag);\(varC.flag1!);\(varC.flag2!);\(varC.flag3!);\(varC.flag4!);\(varC.flagV1);\(varC.flagV2);\(varC.flagV3);\(varC.flagV4);"
+            case 5:
+                string = "r;\(varC.dbText!);\(varC.numFlag);\(varC.flag1!);\(varC.flag2!);\(varC.flag3!);\(varC.flag4!);\(varC.flag5!);\(varC.flagV1);\(varC.flagV2);\(varC.flagV3);\(varC.flagV4);\(varC.flagV5);"
+            case 6:
+                string = "r;\(varC.dbText!);\(varC.numFlag);\(varC.flag1!);\(varC.flag2!);\(varC.flag3!);\(varC.flag4!);\(varC.flag5!);\(varC.flag6!);\(varC.flagV1);\(varC.flagV2);\(varC.flagV3);\(varC.flagV4);\(varC.flagV5);\(varC.flagV6);"
+            case 7:
+                string = "r;\(varC.dbText!);\(varC.numFlag);\(varC.flag1!);\(varC.flag2!);\(varC.flag3!);\(varC.flag4!);\(varC.flag5!);\(varC.flag6!);\(varC.flag7!);\(varC.flagV1);\(varC.flagV2);\(varC.flagV3);\(varC.flagV4);\(varC.flagV5);\(varC.flagV6);\(varC.flagV7);"
+            case 8:
+                string = "r;\(varC.dbText!);\(varC.numFlag);\(varC.flag1!);\(varC.flag2!);\(varC.flag3!);\(varC.flag4!);\(varC.flag5!);\(varC.flag6!);\(varC.flag7!);\(varC.flag7!);\(varC.flagV1);\(varC.flagV2);\(varC.flagV3);\(varC.flagV4);\(varC.flagV5);\(varC.flagV6);\(varC.flagV7);\(varC.flagV8);"
+            default:
+                print("NumFlag was not between 1 and 8 was \(varC.numFlag)")
+            }
+        }
+        else{
+            string = "f;\(varC.dbText!);\(varC.userText!);\(varC.dbText2!)"
+        }
+        
+    }*/
+    //Combines the above functions to allow for one call to parse the string format
+    // function takes in a string creates a Vcell and returns it once complete
+    /*
+     func parse(string: inout String){
+        let data = Vcell()
+        getType(string: &string, varC: data)
+        print("Afer Type: \(string)")
+        if(data.type == 1){
+            getDBText(string: &string, varC: data)
+            print("After DBText: \(string)")
+            getnumFlag(string: &string, varC: data)
+            print("Num Flag \(data.numFlag)")
+            print("After NumFlag: \(string)")
+            getFlags(string: &string, varC: data)
+            print("After GetFlag: \(string)")
+            getFlagVs(string: &string, varC: data)
+            print("After GetFlagV: \(string)")
+        }
+        else{
+            getDBText(string: &string, varC: data)
+            getUserText(string: &string, varC: data)
+            getDBText2(string: &string, varC: data)
+        }
+        return data
+    }
+    */
+    
+    /* NFIOEGNWINEWKL:G*/
+    
+    
+    
+    
+    
+    
+    
     
     // Initializes comment cells with values loaded from the state controller
     func initCommentCell(cell: CommentViewCell, subSectionIndex: Int, row: Int) {
