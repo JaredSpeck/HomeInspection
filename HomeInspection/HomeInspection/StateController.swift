@@ -152,6 +152,12 @@ class StateController {
         return subsections[subSectionId]!.subSectionName!
     }
     
+    // Get variant cell information
+    
+    func getVariantString() -> String {
+        return "r;Type:;5;A;B;C;D;E;1;0;0;0;0;"
+    }
+    
     
     // Get comment cell information
     
