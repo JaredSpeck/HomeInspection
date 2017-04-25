@@ -7,13 +7,12 @@
 //
 
 import UIKit
+import CoreData
 
 class DashboardViewController: UIViewController {
 
+    // MARK: Properties
     
-    
-    // Properties
-
     
     
     

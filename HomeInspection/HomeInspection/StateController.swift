@@ -16,6 +16,7 @@ class StateController {
     // MARK: - Properties
     
     static let state = StateController();
+    
     private let INSPECTION = 1
     private let DEFAULT_DATA = 2 // sections, subsections, and comments
     private let RESULT = 3
@@ -24,17 +25,22 @@ class StateController {
     private var inspectionId: Int? = nil
     private var nextResultId: Int = 0
     
+    var managedObjectContext: NSManagedObjectContext!
+    
+    // List of all inspections cached in device
+    private(set) var inspections = [Inspection]()
+    
     // List of inspection results with unique resultId
-    private(set) var results = [Result?]()
+    private(set) var results = [Result]()
     
     // List of all section names with unique sectionId
-    private(set) var sections = Dictionary<Int, Section>()
+    private(set) var sections = [Section]()
     
     // List of all subsection names with unique subSectionId
-    private(set) var subsections = Dictionary<Int, SubSection>()
+    private(set) var subsections = [SubSection]()
     
     // List of all comments with unique commentId
-    private(set) var comments = Dictionary<Int, Comment>()
+    private(set) var comments = [Comment]()
 
     private var reusableResultIds = [Int]()
     
@@ -52,6 +58,9 @@ class StateController {
     // Default initializer - Hidden to prevent reinitializing state.
     private init() {
         print("Starting state init\n")
+        
+        // Initialize the managed objec context (Core Data stack)
+        managedObjectContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         
         // Check for updates and refresh cache if necessary
         print("\tChecking for updates...")
@@ -98,7 +107,13 @@ class StateController {
         if (reusableResultIds.count > 0) {
             // Place result in one of the holes in the list
             returnId = reusableResultIds.popLast()!
-            results[returnId] = Result(id: returnId, inspectionId: getNextInspId(), commentId: commentId, variantId: nil)
+            //results[returnId] = Result(id: returnId, inspectionId: getNextInspId(), commentId: commentId, variantId: nil)
+            let resultItem = Result(context: managedObjectContext)
+            resultItem.id = Int32(returnId)
+            resultItem.inspectionId = getNextInspId()
+            resultItem.commentId = commentId
+            resultItem.variantId = nil
+            
         }
         else {
             // Add result to the end of the list
@@ -155,10 +170,10 @@ class StateController {
     // Get subsection cell information
     
     func getSubSectionText(sectionId: Int, subSectionIndex: Int) -> String {
-        let currentSection = self.sections[sectionId]!
+        /*let currentSection = self.sections[sectionId]!
         let subSectionId = currentSection.subSectionIds[subSectionIndex]
-        
-        return subsections[subSectionId]!.subSectionName!
+        */
+        return "Under Construction"//subsections[subSectionId]!.subSectionName!
     }
     
     
@@ -166,7 +181,7 @@ class StateController {
     
     // Translates the cells location into a comment id
     func getCommentId(sectionId: Int, subSectionIndex: Int, rowNum: Int) -> Int? {
-        let currentSection = sections[sectionId]!
+        /*let currentSection = sections[sectionId]!
         let currentSubSection = subsections[currentSection.subSectionIds[subSectionIndex]]!
         
         let commentIndex = rowNum - currentSubSection.variantIds.count - 1
@@ -174,8 +189,10 @@ class StateController {
         
         print("Getting comment ID for cell in Section: \(sectionId), Subsection \(subSectionIndex + 1), with Rank: \(commentIndex + 1)")
         print("\(commentId)/\(comments.count)")
-    
-        return commentId
+
+        */
+        
+        return 0//commentId
     }
     
     func getCommentText(commentId: Int) -> String {
@@ -183,13 +200,13 @@ class StateController {
         if (commentId >= comments.count) {
             return "Error getting text for comment: Id \(commentId) out of range (\(comments.count))"
         }
-        return comments[commentId]!.commentText
+        return "Under Construction"//comments[commentId]!.commentText
     }
     
     func getSection(subSectionId: Int) -> Int {
         print("getting section for subsection \(subSectionId)")
         
-        return subsections[subSectionId]!.sectionId
+        return 0//subsections[subSectionId]!.sectionId
     }
     
     // End of UI data transfer functions
@@ -294,7 +311,7 @@ class StateController {
     
     // Parses default data from database and uses data to refresh the local cache (delete old and insert new values)
     func parseDefaultData(json: JSON) {
-        let currentContext = StateController.getContext()
+        let currentContext = self.managedObjectContext
         
         // Flush out old data from cache
         self.deleteAllInstances(entityName: "Section")
@@ -303,14 +320,14 @@ class StateController {
         
         // Load in new data to the cache
         for (_, sectionJson) in json["sections"] {
-            let newSection = Section(context: currentContext)
+            let newSection = Section(context: managedObjectContext)
             
             // Set section attributes
             newSection.id = Int32(sectionJson["id"].intValue)
             newSection.name = sectionJson["name"].string
             
             for (_, subSectionJson) in sectionJson["subsections"] {
-                let newSubSection = SubSection(context: currentContext)
+                let newSubSection = SubSection(context: managedObjectContext)
                 
                 // Set subsection attributes
                 newSubSection.id = Int32(subSectionJson["id"].intValue)
@@ -323,7 +340,7 @@ class StateController {
                 
                 for (_, commentJson) in subSectionJson["comments"] {
                     //let commentId = commentJson["id"].intValue
-                    let newComment = Comment(context: currentContext)
+                    let newComment = Comment(context: managedObjectContext)
                     
                     // Set comment attributes
                     newComment.id = Int32(commentJson["id"].intValue)
@@ -341,7 +358,11 @@ class StateController {
         }
         
         // Save cache changes to disk
-        StateController.saveContext()
+        do {
+            try self.managedObjectContext.save()
+        } catch {
+            print("Could not save data \(error.localizedDescription)")
+        }
     }
     
     // Compares last updated times for the default data tables for continuity with database
@@ -356,7 +377,7 @@ class StateController {
         // Get times from cache (if there is one)
         let fetchRequest: NSFetchRequest<LastChange> = LastChange.fetchRequest()
         do {
-            let lastChangeResults = try StateController.getContext().fetch(fetchRequest)
+            let lastChangeResults = try self.managedObjectContext.fetch(fetchRequest)
             print("\tFound \(lastChangeResults.count > 0 ? "saved " : "no saved") data.")
             
             // Check for correct number of update time in local cache
@@ -392,61 +413,13 @@ class StateController {
     
     
     
-    // MARK: - Core Data Stack
-    
-    static var persistentContainer: NSPersistentContainer = {
-        /*
-         The persistent container for the application. This implementation
-         creates and returns a container, having loaded the store for the
-         application to it. This property is optional since there are legitimate
-         error conditions that could cause the creation of the store to fail.
-         */
-        let container = NSPersistentContainer(name: "Databases")
-        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
-            if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
-                fatalError("Unresolved error \(error), \(error.userInfo)")
-            }
-        })
-        return container
-    }()
-    
-    // MARK: Core Data Support
-    
-    class func getContext() -> NSManagedObjectContext {
-        return persistentContainer.viewContext
-    }
-    
-    class func saveContext () {
-        let context = getContext()
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-            }
-        }
-    }
-    
+        
     private func deleteAllInstances(entityName: String) {
         let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetch)
         
         do {
-            try StateController.getContext().execute(deleteRequest)
+            try self.managedObjectContext.execute(deleteRequest)
         } catch {
             print("Error flushing \(entityName) instances from cache")
         }
