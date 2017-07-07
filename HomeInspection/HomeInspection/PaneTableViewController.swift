@@ -31,7 +31,7 @@ class PaneTableViewController: UITableViewController {
         
         print("Section cell created for sectionId \(indexPath.row + 1)")
         
-        paneCell.sectionLabel.text = StateController.state.sections[paneCell.sectionId]!.sectionName
+        paneCell.sectionLabel.text = StateController.state.sections[paneCell.sectionId - 1].name
         
         paneCell.sectionButtonTapAction = { (cell) in
             self.inspectionVC!.loadSection(sectionId: paneCell.sectionId!)

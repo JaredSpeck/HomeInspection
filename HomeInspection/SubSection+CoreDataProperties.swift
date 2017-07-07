@@ -18,6 +18,7 @@ extension SubSection {
 
     @NSManaged public var id: Int32
     @NSManaged public var name: String?
+    @NSManaged public var isExpanded: Bool
     @NSManaged public var comments: NSSet?
     @NSManaged public var variants: NSSet?
     @NSManaged public var section: Section?

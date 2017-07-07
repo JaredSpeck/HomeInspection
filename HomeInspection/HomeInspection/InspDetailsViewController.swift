@@ -10,17 +10,16 @@ import UIKit
 
 class InspDetailsViewController: UIViewController {
     
-    
-    
     // Properties
     var resultsDelegate: StateController? = nil
     
+
     
-    
-    // Other Functions
+    // Called when the view loads
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+
+        initNavBar()
     }
     
     override func didReceiveMemoryWarning() {
@@ -28,6 +27,7 @@ class InspDetailsViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    // Called before running a segue
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if (segue.identifier == "embedPaneInInspDetailsView") {
             let paneVC = segue.destination as! PaneViewController
@@ -35,7 +35,38 @@ class InspDetailsViewController: UIViewController {
             paneVC.isInspectionLoaded = false;
             
         }
+     }
+    
+    // Initializes the navigation bar with buttons and text
+    func initNavBar() {
+        self.title = "Inspection Setup"
+        
+        let startNavButton = UIBarButtonItem(
+            title: "Start",
+            style: .plain,
+            target: self,
+            action: #selector(showInspection(sender:)))
+        
+        self.navigationItem.rightBarButtonItem = startNavButton
     }
     
+    // Called when the 'Start' nav button is pressed
+    func showInspection(sender: UIBarButtonItem) {
+        print("Starting Inspection")
+        
+        if let navController = self.navigationController as? InspectionNavigationController {
+            
+            /* Save managed object context
+             do {
+                try
+            } catch {
+ 
+            }
+            */
+            
+            navController.popViewController(animated: false)
+            navController.pushViewController(navController.inspectionVC, animated: false)
+        }
+    }
 }
 

@@ -63,6 +63,10 @@
 		41E047D31E27FCFB00E6804B /* OldComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E047D21E27FCFB00E6804B /* OldComment.swift */; };
 		41E047E01E2805ED00E6804B /* InspectionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E047DF1E2805ED00E6804B /* InspectionTableViewController.swift */; };
 		41E4E5631E2822630043B57F /* OldSubSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E4E5621E2822630043B57F /* OldSubSection.swift */; };
+		FB8D31C51ED8C4A7007E8450 /* DashboardTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB8D31C41ED8C4A7007E8450 /* DashboardTableViewController.swift */; };
+		FB8D31CC1ED8CF27007E8450 /* DashboardViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB8D31CA1ED8CF27007E8450 /* DashboardViewCell.swift */; };
+		FB8D31CD1ED8CF27007E8450 /* DashboardViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = FB8D31CB1ED8CF27007E8450 /* DashboardViewCell.xib */; };
+		FB8D31CF1F0621E7007E8450 /* InspectionNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB8D31CE1F0621E7007E8450 /* InspectionNavigationController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -145,6 +149,10 @@
 		41E047D21E27FCFB00E6804B /* OldComment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OldComment.swift; sourceTree = "<group>"; };
 		41E047DF1E2805ED00E6804B /* InspectionTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectionTableViewController.swift; sourceTree = "<group>"; };
 		41E4E5621E2822630043B57F /* OldSubSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OldSubSection.swift; sourceTree = "<group>"; };
+		FB8D31C41ED8C4A7007E8450 /* DashboardTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashboardTableViewController.swift; sourceTree = "<group>"; };
+		FB8D31CA1ED8CF27007E8450 /* DashboardViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashboardViewCell.swift; sourceTree = "<group>"; };
+		FB8D31CB1ED8CF27007E8450 /* DashboardViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DashboardViewCell.xib; sourceTree = "<group>"; };
+		FB8D31CE1F0621E7007E8450 /* InspectionNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectionNavigationController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,8 +212,9 @@
 				412C45181E3C12AF00D713D6 /* Inspection Page */,
 				41243D4F1DF88AC5007747C3 /* Main.storyboard */,
 				412FA1031E2715E200DE6BB9 /* StateController.swift */,
-				411F938B1E514A33008F4FA2 /* PhotoViewController.swift */,
+				FB8D31CE1F0621E7007E8450 /* InspectionNavigationController.swift */,
 				411F93891E513FF8008F4FA2 /* SwiftyJSON.swift */,
+				41243D4B1DF88AC5007747C3 /* AppDelegate.swift */,
 				41E047DD1E28010500E6804B /* Data Models */,
 				41E047DE1E28011900E6804B /* Other Stuff */,
 			);
@@ -256,6 +265,9 @@
 			children = (
 				41E047C61E27F22900E6804B /* DashboardView.swift */,
 				41243D4D1DF88AC5007747C3 /* DashboardViewController.swift */,
+				FB8D31C41ED8C4A7007E8450 /* DashboardTableViewController.swift */,
+				FB8D31CA1ED8CF27007E8450 /* DashboardViewCell.swift */,
+				FB8D31CB1ED8CF27007E8450 /* DashboardViewCell.xib */,
 			);
 			name = "Dashboard Page";
 			sourceTree = "<group>";
@@ -348,7 +360,7 @@
 			isa = PBXGroup;
 			children = (
 				41243D521DF88AC5007747C3 /* Assets.xcassets */,
-				41243D4B1DF88AC5007747C3 /* AppDelegate.swift */,
+				411F938B1E514A33008F4FA2 /* PhotoViewController.swift */,
 				41243D571DF88AC6007747C3 /* Info.plist */,
 			);
 			name = "Other Stuff";
@@ -417,7 +429,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0800;
-				LastUpgradeCheck = 0820;
+				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = "Jared Speck";
 				TargetAttributes = {
 					41243D471DF88AC5007747C3 = {
@@ -462,6 +474,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FB8D31CD1ED8CF27007E8450 /* DashboardViewCell.xib in Resources */,
 				41DF97031E46C76200950A87 /* PaneViewCell.xib in Resources */,
 				412C45361E3C4F5000D713D6 /* SubSectionHeaderViewCell.xib in Resources */,
 				41243D531DF88AC5007747C3 /* Assets.xcassets in Resources */,
@@ -493,7 +506,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				4155840A1E5FFB4600502272 /* Address+CoreDataClass.swift in Sources */,
+				FB8D31CF1F0621E7007E8450 /* InspectionNavigationController.swift in Sources */,
 				41E047CD1E27F26700E6804B /* LookupView.swift in Sources */,
+				FB8D31CC1ED8CF27007E8450 /* DashboardViewCell.swift in Sources */,
 				412FA1141E27200100DE6BB9 /* InspDetailsViewController.swift in Sources */,
 				415584121E5FFB4600502272 /* Inspector+CoreDataClass.swift in Sources */,
 				415584051E5FFB4600502272 /* Client+CoreDataProperties.swift in Sources */,
@@ -520,6 +535,7 @@
 				4155840E1E5FFB4600502272 /* Section+CoreDataClass.swift in Sources */,
 				415584071E5FFB4600502272 /* Variant+CoreDataProperties.swift in Sources */,
 				41E047CF1E27F27A00E6804B /* InspDetailsView.swift in Sources */,
+				FB8D31C51ED8C4A7007E8450 /* DashboardTableViewController.swift in Sources */,
 				415584131E5FFB4600502272 /* Inspector+CoreDataProperties.swift in Sources */,
 				4155841B1E5FFD5B00502272 /* LastChange+CoreDataClass.swift in Sources */,
 				41DF97021E46C76200950A87 /* PaneViewCell.swift in Sources */,
@@ -707,7 +723,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.capstone.HomeInspection;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;

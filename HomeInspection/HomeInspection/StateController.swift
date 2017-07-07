@@ -20,7 +20,7 @@ class StateController {
     private let INSPECTION = 1
     private let DEFAULT_DATA = 2 // sections, subsections, and comments
     private let RESULT = 3
-    private let LAST_UPDATE = 4
+    private let LAST_CHANGE = 4
     
     private var inspectionId: Int? = nil
     private var nextResultId: Int = 0
@@ -44,6 +44,9 @@ class StateController {
 
     private var reusableResultIds = [Int]()
     
+    // Holds timestamp of last time default data was modified
+    private var lastChange = [LastChange]()
+    
     // End of Properties
     
     
@@ -51,40 +54,81 @@ class StateController {
     // MARK: - Initialization
     
     // MARK: Flags
-    private var needCacheRefresh: Bool = false
+    private var needCacheRefresh: Bool = true
     private var dataIsInitialized: Bool = false
     
     // MARK: Initializer
     // Default initializer - Hidden to prevent reinitializing state.
     private init() {
+        self.dataIsInitialized = false
         print("Starting state init\n")
         
-        // Initialize the managed objec context (Core Data stack)
-        managedObjectContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        
-        // Check for updates and refresh cache if necessary
-        print("\tChecking for updates...")
-        self.pullFromUrl(option: LAST_UPDATE)
-        
-        if (self.needCacheRefresh) {
-            print("\tUpdating...")
-            self.refreshCache()
-        }
-        else {
-            print("\tCache up to date.")
-        }
+        loadData();
         
         print("\nState init complete")
         self.dataIsInitialized = true
     }
     
+    private func loadData(tries: Int = 0) {
+        // Initialize the managed object context (Core Data stack)
+        managedObjectContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        
+        // Ensures cache is up to date with most recent default data
+        validateCache()
+        
+        // Load default data from device
+        let sectionRequest: NSFetchRequest<Section> = Section.fetchRequest()
+        let subSectionRequest: NSFetchRequest<SubSection> = SubSection.fetchRequest()
+        let commentRequest: NSFetchRequest<Comment> = Comment.fetchRequest()
+        
+        // Load cached data from device
+        let inspectionRequest: NSFetchRequest<Inspection> = Inspection.fetchRequest()
+        let resutRequest:NSFetchRequest<Result> = Result.fetchRequest()
+        
+        do {
+            sections = try managedObjectContext.fetch(sectionRequest)
+            subsections = try managedObjectContext.fetch(subSectionRequest)
+            comments = try managedObjectContext.fetch(commentRequest)
+            inspections = try managedObjectContext.fetch(inspectionRequest)
+            results = try managedObjectContext.fetch(resutRequest)
+        } catch {
+            // Attempt to try again. (up to 3 attempts)
+            print("Error loading data from device memory: \(error.localizedDescription)")
+            if (tries < 2) {
+                loadData(tries: tries + 1)
+            } else {
+                print("Failed too many times. Quitting")
+            }
+        }
+    }
+    
     // Refreshes the local cache of default data if out of sync with online database
     // TODO: Completely wipes default data cache for now, maybe do changes only later
-    private func refreshCache() {
-        self.dataIsInitialized = false
+    private func validateCache() {
+        // Get last change timestamp from device
+        let lastChangeRequest: NSFetchRequest<LastChange> = LastChange.fetchRequest()
+        do {
+            lastChange = try managedObjectContext.fetch(lastChangeRequest)
+        } catch {
+            print("Could not fetch last data update timestamp from device: \(error.localizedDescription)")
+        }
         
-        // Get and parse data from database
-        pullFromUrl(option: DEFAULT_DATA)
+        // Check online for last change timestamp
+        print("\tChecking for updates...")
+        self.pullFromUrl(option: LAST_CHANGE)
+        
+        // FIXME: Remove once working correctly
+        
+        if (self.needCacheRefresh) {
+            print("\tUpdating...")
+            // Get and parse data from database
+            pullFromUrl(option: DEFAULT_DATA)
+        }
+        else {
+            print("\tCache up to date.")
+        }
+        
+        print("Local cache validated")
     }
     
     // End of Initialization
@@ -104,25 +148,35 @@ class StateController {
     func userAddedResult(commentId: Int) -> Int {
         var returnId: Int
         
+        var addedResult: Result
+        
         if (reusableResultIds.count > 0) {
             // Place result in one of the holes in the list
             returnId = reusableResultIds.popLast()!
+            addedResult = results[returnId]
             //results[returnId] = Result(id: returnId, inspectionId: getNextInspId(), commentId: commentId, variantId: nil)
-            let resultItem = Result(context: managedObjectContext)
-            resultItem.id = Int32(returnId)
-            resultItem.inspectionId = getNextInspId()
-            resultItem.commentId = commentId
-            resultItem.variantId = nil
+            addedResult.id = Int32(returnId)
+            //resultItem.inspection = getNextInspId()
+            addedResult.comment!.id = Int32(commentId)
+            addedResult.variant = nil
+            addedResult.isActive = true
             
         }
         else {
             // Add result to the end of the list
-            results.append(Result(id: nextResultId, inspectionId: getNextInspId(), commentId: commentId, variantId: nil))
+            addedResult = Result(context: managedObjectContext)
+            addedResult.id = Int32(nextResultId)
+            //addedResult.inspection = ?
+            addedResult.comment!.id = Int32(commentId)
+            addedResult.variant = nil
+            addedResult.isActive = true
+            
+            results.append(addedResult)
             returnId = nextResultId
             nextResultId += 1
         }
         
-        comments[commentId]!.resultId = returnId
+        //comments[commentId].resultId = returnId
         
         return returnId
         
@@ -131,22 +185,24 @@ class StateController {
     
     func userRemovedResult(resultId: Int) -> Void {
         
-        let removedResult = results[resultId]
-        let removedCommentId = removedResult!.commentId
+        //let removedResult = results[resultId]
         
-        comments[removedCommentId!]!.resultId = nil
+        //TODO: if let to test between comment and variant
+        //let removedCommentId = Int((removedResult.comment?.id)!)
+        
+        //comments[removedCommentId].resultId = nil
         
         // Add index of hole to reuasable id list
         reusableResultIds.append(resultId)
         
         // Make a hole in the results list
-        results[resultId] = nil
+        results[resultId].isActive = false
     }
     
     // Adds one to the severity and modulo's the result by 3. Returns the new severity value
     func userChangedSeverity(resultId: Int) -> Int {
-        self.results[resultId]!.severity = (self.results[resultId]!.severity % 2) + 1
-        return self.results[resultId]!.severity
+        self.results[resultId].severity = (self.results[resultId].severity % 2) + 1
+        return Int(self.results[resultId].severity)
     }
     
     func userChangedNote(resultId: Int, note: String) -> String {
@@ -247,7 +303,7 @@ class StateController {
             break
         case self.RESULT:
             break
-        case self.LAST_UPDATE:
+        case self.LAST_CHANGE:
             break
         default:
             break
@@ -289,7 +345,7 @@ class StateController {
                 case self.RESULT:
                     // FIXME: Parse results?
                     break
-                case self.LAST_UPDATE:
+                case self.LAST_CHANGE:
                     self.needCacheRefresh = self.compareTimes(lastUpdateJson: json)
                     isPullFinished = true
                     break
@@ -311,7 +367,6 @@ class StateController {
     
     // Parses default data from database and uses data to refresh the local cache (delete old and insert new values)
     func parseDefaultData(json: JSON) {
-        let currentContext = self.managedObjectContext
         
         // Flush out old data from cache
         self.deleteAllInstances(entityName: "Section")
@@ -403,8 +458,8 @@ class StateController {
         } catch {
             print("\nError getting last updated time from core data:\n\(error)")
         }
-        
-        return doTimesDiffer
+        // FIXME: Need to get a url for update time
+        return true//doTimesDiffer
     }
     
 

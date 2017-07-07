@@ -15,7 +15,7 @@ extension Result {
     @nonobjc public class func fetchRequest() -> NSFetchRequest<Result> {
         return NSFetchRequest<Result>(entityName: "Result");
     }
-
+    @NSManaged public var isActive: Bool
     @NSManaged public var id: Int32
     @NSManaged public var note: String?
     @NSManaged public var photoPath: String?
