@@ -35,7 +35,10 @@ class InspectionNavigationController: UINavigationController {
         
         self.pushViewController(dashboardVC, animated: false)
         
-    
+        // Set navigation bar appearance
+        self.navigationBar.isTranslucent = false
+        self.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+        self.navigationBar.shadowImage = UIImage()
     }
 
     override func didReceiveMemoryWarning() {
