@@ -7,60 +7,92 @@
 //
 
 import UIKit
+import CoreData
 
 class InspectionViewController: UIViewController {
 
     
     
-    // Properties
-    weak var previousController: UIViewController!
+    // MARK: Properties    
     
-    var sectionId: Int! = 1
+    var managedObjectContext: NSManagedObjectContext!
+    var loadedInspectionData: InspectionData!
+    var loadedInspection: Inspection!
+    var currentSectionId: Int32!
+    
+    private var inspTableVC: InspectionTableViewController!
+    
     @IBOutlet weak var sectionLabel: UILabel!
+
     
     
+    // MARK: Initialization
     
-    func loadSection(sectionId: Int) {
-        let newSection = StateController.state.sections[sectionId]
-        sectionLabel.text = newSection.name
-        
-        // ADD CODE TO LOAD SECTION/SUBSECTION/COMMENTS
-        NotificationCenter.default.post(name: Notification.Name(rawValue: "refreshSection"), object: sectionId)
-    }
-    
-    // Other Functions
+    // Called once when VC is loaded into memory
     override func viewDidLoad() {
         super.viewDidLoad()
-        if (StateController.state.sections.count > sectionId) {
-            sectionLabel.text = StateController.state.sections[sectionId].name
-        }
-        else {
-            sectionLabel.text = "Error Loading data"
-        }
-        // Do any additional setup after loading the view.
+        
+        // Load CoreData context
+        managedObjectContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     }
+    
+    // Called every time VC will appear
+    override func viewWillAppear(_ animated: Bool) {
+        loadInspection()
+    }
+    
+    
+    
+    // MARK: Helper functions
+    
+    func loadSection(sectionId newId: Int) {
+        if let newSection: Section = loadedInspectionData.sections?.first(where: { ($0 as! Section).id == Int32(newId) }) as? Section {
+            print("Loading new section: \(newId)")
+            sectionLabel.text = newSection.name
+        }
+        
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "refreshSection"), object: Int32(newId))
+    }
+    
+    func loadInspection() {
+        print("Loading inspection: \(loadedInspection.id)")
 
+        // Load inspection data from disk
+        let fetchRequest: NSFetchRequest<InspectionData> = InspectionData.fetchRequest()
+        do {
+            let fetchRequestResults: [InspectionData] = try managedObjectContext.fetch(fetchRequest)
+            
+            if let tempInspectionData: InspectionData = fetchRequestResults.first {
+                loadedInspectionData = tempInspectionData
+                inspTableVC.loadedInspectionData = loadedInspectionData
+            }
+        } catch {
+            print("Error fetching inspection data from disk: \(error.localizedDescription)")
+        }
+        
+        // Set references for this and table controller
+        inspTableVC.loadedInspection = loadedInspection
+        inspTableVC.currentSectionId = currentSectionId
+        
+        loadSection(sectionId: 1)
+    }
+    
+    // MARK: Misc functions
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        
         if (segue.identifier == "embedInspectionTableViewController") {
-                let inspTableVC = segue.destination as! InspectionTableViewController
-                inspTableVC.sectionId = self.sectionId
-                print("Passing sectionId: \(self.sectionId!) to Inspection Table")
+            let tempInspTableVC = segue.destination as! InspectionTableViewController
+            self.inspTableVC = tempInspTableVC
         }
-        else if (segue.identifier == "embedPaneViewControllerInInspectionView") {
-                let paneVC = segue.destination as! PaneViewController
-                paneVC.parentInpectionViewController = self
-                print("Passing InspectionVC reference to embedded PaneVC")
-        }
-        else if (segue.identifier == "inspToDashboard") {
-            // FIXME: Call an unwind segue for this
-                self.dismiss(animated: false, completion: {})
-                previousController.dismiss(animated: true, completion: {})
+        else if (segue.identifier == "embedPaneInInspection") {
+            if let paneVC: PaneViewController = segue.destination as? PaneViewController {
+                paneVC.showSections = true
+            }
         }
     }
 }

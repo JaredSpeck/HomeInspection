@@ -1,8 +1,8 @@
 //
-//  SubSection+CoreDataClass.swift
+//  AppValues+CoreDataClass.swift
 //  HomeInspection
 //
-//  Created by Jared Speck on 2/24/17.
+//  Created by Jared Speck on 7/16/17.
 //  Copyright © 2017 Jared Speck. All rights reserved.
 //
 
@@ -10,6 +10,6 @@ import Foundation
 import CoreData
 
 
-public class SubSection: NSManagedObject {
+public class AppValues: NSManagedObject {
 
 }

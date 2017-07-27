@@ -2,7 +2,7 @@
 //  Inspection+CoreDataProperties.swift
 //  HomeInspection
 //
-//  Created by Jared Speck on 2/23/17.
+//  Created by Jared Speck on 7/16/17.
 //  Copyright © 2017 Jared Speck. All rights reserved.
 //
 
@@ -13,15 +13,16 @@ import CoreData
 extension Inspection {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<Inspection> {
-        return NSFetchRequest<Inspection>(entityName: "Inspection");
+        return NSFetchRequest<Inspection>(entityName: "Inspection")
     }
 
     @NSManaged public var date: String?
+    @NSManaged public var homeImage: NSData?
     @NSManaged public var id: Int32
-    @NSManaged public var inspectorId: Int32
     @NSManaged public var address: Address?
-    @NSManaged public var results: NSSet?
+    @NSManaged public var client: Client?
     @NSManaged public var inspector: Inspector?
+    @NSManaged public var results: NSSet?
 
 }
 

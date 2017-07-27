@@ -45,7 +45,7 @@ class StateController {
     private var reusableResultIds = [Int]()
     
     // Holds timestamp of last time default data was modified
-    private var lastChange = [LastChange]()
+    private var localModTimes: AppValues!
     
     // End of Properties
     
@@ -63,7 +63,7 @@ class StateController {
         self.dataIsInitialized = false
         print("Starting state init\n")
         
-        loadData();
+        //loadData();
         
         print("\nState init complete")
         self.dataIsInitialized = true
@@ -106,9 +106,12 @@ class StateController {
     // TODO: Completely wipes default data cache for now, maybe do changes only later
     private func validateCache() {
         // Get last change timestamp from device
-        let lastChangeRequest: NSFetchRequest<LastChange> = LastChange.fetchRequest()
+        let appValuesRequest: NSFetchRequest<AppValues> = AppValues.fetchRequest()
         do {
-            lastChange = try managedObjectContext.fetch(lastChangeRequest)
+            let fetchResult = try managedObjectContext.fetch(appValuesRequest)
+            if (fetchResult.first != nil) {
+                localModTimes = fetchResult.first!
+            }
         } catch {
             print("Could not fetch last data update timestamp from device: \(error.localizedDescription)")
         }
@@ -200,10 +203,7 @@ class StateController {
     }
     
     // Adds one to the severity and modulo's the result by 3. Returns the new severity value
-    func userChangedSeverity(resultId: Int) -> Int {
-        self.results[resultId].severity = (self.results[resultId].severity % 2) + 1
-        return Int(self.results[resultId].severity)
-    }
+
     
     func userChangedNote(resultId: Int, note: String) -> String {
         print("Note for \(resultId)")
@@ -430,24 +430,24 @@ class StateController {
         let lastSectionUpdate: String = lastUpdateJson["sectionTime"].string!
         
         // Get times from cache (if there is one)
-        let fetchRequest: NSFetchRequest<LastChange> = LastChange.fetchRequest()
+        let fetchRequest: NSFetchRequest<AppValues> = AppValues.fetchRequest()
         do {
-            let lastChangeResults = try self.managedObjectContext.fetch(fetchRequest)
-            print("\tFound \(lastChangeResults.count > 0 ? "saved " : "no saved") data.")
+            let fetchRequestResults = try self.managedObjectContext.fetch(fetchRequest)
+            print("\tFound \(fetchRequestResults.count > 0 ? "saved " : "no saved") data.")
             
             // Check for correct number of update time in local cache
-            if (lastChangeResults.count == 1) {
-                let lastChange: LastChange = lastChangeResults[0]
+            if (fetchRequestResults.count == 1) {
+                let appValues: AppValues = fetchRequestResults.first!
                 
-                if (lastCommentUpdate == lastChange.commentTime &&
-                    lastSubSectionUpdate == lastChange.subSectionTime &&
-                    lastSectionUpdate == lastChange.sectionTime) {
+                if (lastCommentUpdate == appValues.commentModTime &&
+                    lastSubSectionUpdate == appValues.subSectionModTime &&
+                    lastSectionUpdate == appValues.sectionModTime) {
                     
                     // Local cache and database times match, no refresh required
                     doTimesDiffer = false
                 }
             }
-            else if (lastChangeResults.count > 1 || lastChangeResults.count < 0) {
+            else if (fetchRequestResults.count > 1 || fetchRequestResults.count < 0) {
                 print("Incorrect number of local update times found. Deleting and refreshing cache")
             }
             else {

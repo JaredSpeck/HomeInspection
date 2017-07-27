@@ -2,7 +2,7 @@
 //  SubSection+CoreDataProperties.swift
 //  HomeInspection
 //
-//  Created by Jared Speck on 2/24/17.
+//  Created by Jared Speck on 7/16/17.
 //  Copyright © 2017 Jared Speck. All rights reserved.
 //
 
@@ -13,15 +13,16 @@ import CoreData
 extension SubSection {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<SubSection> {
-        return NSFetchRequest<SubSection>(entityName: "SubSection");
+        return NSFetchRequest<SubSection>(entityName: "SubSection")
     }
 
     @NSManaged public var id: Int32
-    @NSManaged public var name: String?
     @NSManaged public var isExpanded: Bool
+    @NSManaged public var name: String?
     @NSManaged public var comments: NSSet?
-    @NSManaged public var variants: NSSet?
     @NSManaged public var section: Section?
+    @NSManaged public var variants: NSSet?
+    @NSManaged public var inspectionData: InspectionData?
 
 }
 

@@ -25,8 +25,6 @@ class DashboardTableViewController: UITableViewController {
         
         let pcell = UINib(nibName: "DashboardViewCell", bundle: nil)
         tableView.register(pcell, forCellReuseIdentifier: "DashboardViewCell")
-        
-        
     }
     
     // Load locally cached inspections into memory
@@ -35,9 +33,9 @@ class DashboardTableViewController: UITableViewController {
         
         do {
             inspections = try managedObjectContext.fetch(inspectionFetchRequest)
-            print("inspctions loaded")
+            print("Inspections loaded from disk")
         } catch {
-            print("Could not fetch inspections from device cache: \(error.localizedDescription)")
+            print("Could not fetch inspections from disk: \(error.localizedDescription)")
         }
         
         tableView.reloadData()
@@ -63,12 +61,36 @@ class DashboardTableViewController: UITableViewController {
         
         let dashboardCell = tableView.dequeueReusableCell(withIdentifier: "DashboardViewCell", for: indexPath) as! DashboardViewCell
         
+        // Dashboard cell properties
+        dashboardCell.selectionStyle = .none
+        
+        // Dashboard cell values
+        if let imageData = inspections[indexPath.row].homeImage, let loadedHomeImage = UIImage(data: imageData as Data) {
+            // Set thumbnail to saved home image
+            dashboardCell.houseImageView.image = loadedHomeImage
+        }
+        else {
+            // Clear thumbnail
+            dashboardCell.houseImageView.image = UIImage()
+        }
+        dashboardCell.dateUILabel.text = "Created:\n\t\(inspections[indexPath.row].date!)"
+        dashboardCell.inspectorUILabel.text = "Inspected by:\n\t\(inspections[indexPath.row].id)"
+        
+        var addressLabel: String = "Address:\n\t"
+        if let cellAddress = inspections[indexPath.row].address, let cellStreet: String = cellAddress.street {
+            addressLabel.append(cellStreet)
+            if let cellCity = cellAddress.city {
+                addressLabel.append("\n\t\(cellCity)")
+            }
+        }
+        dashboardCell.addressUILabel.text = addressLabel
+        
         return dashboardCell
     }
     
     // Set row height
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 112
+        return 128
     }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
@@ -86,6 +108,24 @@ class DashboardTableViewController: UITableViewController {
         }
     }
     
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let navController = self.navigationController as? InspectionNavigationController {
+            
+            // Save context
+            safeSaveContext()
+            
+            navController.inspDetailsVC.loadedInspection = inspections[indexPath.row]
+            navController.inspectionVC.loadedInspection = inspections[indexPath.row]
+            
+            // Show next screen
+            navController.pushViewController(navController.inspDetailsVC, animated: true)
+            
+            // Load updated inspections into table
+            loadInspections()
+        }
+        
+    }
+    
     private func deleteInspection(id: Int32) {
         let fetch: NSFetchRequest<Inspection> = Inspection.fetchRequest()
         fetch.predicate = NSPredicate.init(format: "id==\(id)")
@@ -98,13 +138,16 @@ class DashboardTableViewController: UITableViewController {
             managedObjectContext.delete(object)
         }
         
+        print("Writing deletion to disk:")
+        safeSaveContext()
+    }
+    
+    // Saves CoreData context (write changes to disk)
+    func safeSaveContext() {
         do {
-            try managedObjectContext.save()
-            print("Saved deletion")
-        } catch let error as NSError {
-            print("Could not save \(error), \(error.userInfo)")
+            try self.managedObjectContext.save()
         } catch {
-            
+            print("\tError writing to disk: \(error.localizedDescription)")
         }
     }
 

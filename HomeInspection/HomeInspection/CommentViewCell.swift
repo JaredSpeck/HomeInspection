@@ -12,8 +12,6 @@ class CommentViewCell: UITableViewCell {
 
     
     // Properties
-    var commentId: Int? = nil
-    var resultId: Int? = nil
     var commentTextAttributes: [String : Any] = [
         NSFontAttributeName : UIFont.systemFont(ofSize: 16.0),
         NSForegroundColorAttributeName : UIColor.lightText,
@@ -59,12 +57,12 @@ class CommentViewCell: UITableViewCell {
     }
     
     // Changes comment text appearance based off of its severity (value passed in from the state controller)
-    func updateSeverity(severity: Int) {
+    func updateSeverity(severity: Int32) {
         
         //let oldText: String = (commentTextButton.titleLabel?.text)!
         let oldText: String = (commentTextLabel.text)!
         var newText: NSMutableAttributedString
-        
+                
         switch (severity) {
         case 0:
             // No severity -> plain
@@ -91,7 +89,7 @@ class CommentViewCell: UITableViewCell {
             commentTextLabel.attributedText = newText
             break;
         default:
-            print("Comment with resultId \(self.resultId) updated with bad severity value \(severity)")
+            print("Comment updated with bad severity value \(severity)")
         }
     }
     

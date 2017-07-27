@@ -1,5 +1,5 @@
 //
-//  Inspector+CoreDataClass.swift
+//  SubSection+CoreDataClass.swift
 //  HomeInspection
 //
 //  Created by Jared Speck on 7/16/17.
@@ -10,6 +10,6 @@ import Foundation
 import CoreData
 
 
-public class Inspector: NSManagedObject {
+public class SubSection: NSManagedObject {
 
 }

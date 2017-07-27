@@ -13,6 +13,7 @@ class DashboardViewCell: UITableViewCell {
     @IBOutlet weak var houseImageView: UIImageView!
     @IBOutlet weak var addressUILabel: UILabel!
     @IBOutlet weak var dateUILabel: UILabel!
+    @IBOutlet weak var inspectorUILabel: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()

@@ -20,6 +20,7 @@ class SubSectionHeaderViewCell: UITableViewCell {
     }
 
     var expandButtonTapAction: ((SubSectionHeaderViewCell) -> Void)?
+    var tableIndex: Int!
     
     // MARK - Functions
     
