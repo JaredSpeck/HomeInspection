@@ -102,7 +102,7 @@ class DashboardViewController: UIViewController {
                     // FIXME: Always updates, implement when API call is implemented
                     //if (!validateCache(commentModTime, subSectionModTime, sectionModTime)) {
                         // Times differ, need update
-                        //CacheController.cache.refresh()
+                        CacheController.cache.refresh()
                     //}
             })
             
