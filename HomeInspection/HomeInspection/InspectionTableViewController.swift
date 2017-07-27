@@ -15,9 +15,10 @@ class InspectionTableViewController: UITableViewController {
     
     // MARK: Properties
     
-    let BASE_NUM_COMMENTS = 5
-    var sectionId: Int!
-    var numReuses = 0
+    // Parent managed
+    var currentSectionId: Int32!
+    weak var loadedInspection: Inspection!
+    weak var loadedInspectionData: InspectionData!
     
     private let BASE_NUM_COMMENTS = 4
     private var managedObjectContext: NSManagedObjectContext!

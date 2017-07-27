@@ -15,6 +15,17 @@ class InspDetailsViewController: UIViewController, UIImagePickerControllerDelega
     @IBOutlet weak var innerInfoFirstStackView: UIStackView!
     
     
+    // MARK: Properties
+    
+    // Set when selecting inspection on dashboard
+    var loadedInspection: Inspection!
+    // References to currently loaded inspection details
+    var loadedAddress: Address!
+    var loadedClient: Client!
+    // Core Data context
+    var managedObjectContext: NSManagedObjectContext!
+    
+    
     
     // MARK: Initialization
     
