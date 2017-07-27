@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="11759" systemVersion="15G1217" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="MComment" representedClassName="MComment" syncable="YES" codeGenerationType="class">
+        <attribute name="active" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="commentId" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="commentText" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="defaultFlags" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="rank" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="resultId" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+    </entity>
+    <entity name="MSection" representedClassName="MSection" syncable="YES" codeGenerationType="class">
+        <attribute name="sectionId" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="sectionName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="subSectionIds" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="MSubSection" representedClassName="MSubSection" syncable="YES" codeGenerationType="class">
+        <attribute name="commentIds" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="isExpanded" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="subSectionId" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="subSectionName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="variantIds" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="MVariant" representedClassName="MVariant" syncable="YES" codeGenerationType="class">
+        <attribute name="active" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="variantId" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="variantText" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="MComment" positionX="-216" positionY="428" width="128" height="133"/>
+        <element name="MSection" positionX="216" positionY="414" width="128" height="88"/>
+        <element name="MSubSection" positionX="-0" positionY="371" width="128" height="118"/>
+        <element name="MVariant" positionX="-216" positionY="257" width="128" height="88"/>
+    </elements>
+</model>

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class Variant {
+class OldVariant {
     
     //MARK: Properties
     private(set) var variantId: Int!

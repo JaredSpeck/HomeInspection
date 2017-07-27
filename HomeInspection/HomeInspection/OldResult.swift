@@ -8,7 +8,7 @@
 
 import UIKit
 
-class Result {
+class OldResult {
     
     // Set on initialization (immutable)
     let id: Int

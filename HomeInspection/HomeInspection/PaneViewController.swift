@@ -7,35 +7,58 @@
 //
 
 import UIKit
+import CoreData
 
 class PaneViewController: UIViewController {
 
-    var parentInpectionViewController: InspectionViewController!
-    var isInspectionLoaded: Bool = true
-        
+    // MARK: Properties
+    //var parentInpectionViewController: InspectionViewController!
+    var showSections: Bool = true
+    var managedObjectContext: NSManagedObjectContext!
+    var loadedInspectionData: InspectionData!
+    var paneTableVC: PaneTableViewController!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        managedObjectContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
-        // Do any additional setup after loading the view.
+        let fetchRequest: NSFetchRequest<InspectionData> = InspectionData.fetchRequest()
+        do {
+            let fetchRequestResults: [InspectionData] = try managedObjectContext.fetch(fetchRequest)
+            if let tempInspectionData: InspectionData = fetchRequestResults.first {
+                loadedInspectionData = tempInspectionData
+            }
+        } catch {
+            print("Error fetching inspection data in PaneVC")
+        }
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        paneTableVC.numSections = showSections ? loadedInspectionData.sections!.count : 0
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
 
+    
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation0
+    @IBAction func inspDetailsButtonTapAction(_ sender: Any) {
+        if let navController = navigationController as? InspectionNavigationController {
+            if (navController.topViewController != navController.inspDetailsVC) {
+                navController.popViewController(animated: false)
+                navController.pushViewController(navController.inspDetailsVC, animated: false)
+            }
+        }
+    }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        
         if (segue.identifier == "embedTableInPaneView") {
-            let paneTableVC = segue.destination as! PaneTableViewController
-            paneTableVC.inspectionVC = self.parentInpectionViewController
-            paneTableVC.numSections = isInspectionLoaded ? StateController.state.sections.count : 0
-            print("Passing InspectionVC reference to embedded PaneTableVC")
+            paneTableVC = segue.destination as! PaneTableViewController
         }
     }
     

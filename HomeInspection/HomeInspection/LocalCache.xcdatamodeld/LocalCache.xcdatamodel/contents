@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="12141" systemVersion="16G8c" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Address" representedClassName=".Address" syncable="YES">
+        <attribute name="city" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="squareFootage" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="street" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="zip" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="client" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Client" inverseName="addresses" inverseEntity="Client" syncable="YES"/>
+        <relationship name="inspections" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Inspection" inverseName="address" inverseEntity="Inspection" syncable="YES"/>
+    </entity>
+    <entity name="AppValues" representedClassName=".AppValues" syncable="YES">
+        <attribute name="commentModTime" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="sectionModTime" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="subSectionModTime" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="tempInspectionId" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="tempResultId" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+    </entity>
+    <entity name="Client" representedClassName=".Client" syncable="YES">
+        <attribute name="company" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="email" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="first" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="last" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="phone" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="addresses" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Address" inverseName="client" inverseEntity="Address" syncable="YES"/>
+        <relationship name="inspections" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Inspection" inverseName="client" inverseEntity="Inspection" syncable="YES"/>
+    </entity>
+    <entity name="Comment" representedClassName=".Comment" syncable="YES">
+        <attribute name="active" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="rank" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="text" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="defaultFlags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Flag" inverseName="comments" inverseEntity="Flag" syncable="YES"/>
+        <relationship name="inspectionData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="InspectionData" inverseName="comments" inverseEntity="InspectionData" syncable="YES"/>
+        <relationship name="results" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Result" inverseName="comment" inverseEntity="Result" syncable="YES"/>
+        <relationship name="subSection" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SubSection" inverseName="comments" inverseEntity="SubSection" syncable="YES"/>
+    </entity>
+    <entity name="Flag" representedClassName=".Flag" syncable="YES">
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="text" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="comments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="defaultFlags" inverseEntity="Comment" syncable="YES"/>
+        <relationship name="results" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Result" inverseName="extraFlags" inverseEntity="Result" syncable="YES"/>
+    </entity>
+    <entity name="Inspection" representedClassName=".Inspection" syncable="YES">
+        <attribute name="date" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="homeImage" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <relationship name="address" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Address" inverseName="inspections" inverseEntity="Address" syncable="YES"/>
+        <relationship name="client" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Client" inverseName="inspections" inverseEntity="Client" syncable="YES"/>
+        <relationship name="inspector" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Inspector" inverseName="inspections" inverseEntity="Inspector" syncable="YES"/>
+        <relationship name="results" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Result" inverseName="inspection" inverseEntity="Result" syncable="YES"/>
+    </entity>
+    <entity name="InspectionData" representedClassName=".InspectionData" syncable="YES">
+        <attribute name="commentModTime" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="sectionModTime" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="subSectionModTime" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="comments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="inspectionData" inverseEntity="Comment" syncable="YES"/>
+        <relationship name="sections" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Section" inverseName="inspectionData" inverseEntity="Section" syncable="YES"/>
+        <relationship name="subsections" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SubSection" inverseName="inspectionData" inverseEntity="SubSection" syncable="YES"/>
+        <relationship name="variants" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Variant" inverseName="inspectionData" inverseEntity="Variant" syncable="YES"/>
+    </entity>
+    <entity name="Inspector" representedClassName=".Inspector" syncable="YES">
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="inspections" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Inspection" inverseName="inspector" inverseEntity="Inspection" syncable="YES"/>
+    </entity>
+    <entity name="Result" representedClassName=".Result" syncable="YES">
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="isActive" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="note" optional="YES" attributeType="String" defaultValueString="&quot;&quot;" syncable="YES"/>
+        <attribute name="photo" optional="YES" attributeType="Binary" defaultValueString="&quot;&quot;" syncable="YES"/>
+        <attribute name="severity" optional="YES" attributeType="Integer 32" defaultValueString="1" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="tableLocation" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="comment" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Comment" inverseName="results" inverseEntity="Comment" syncable="YES"/>
+        <relationship name="extraFlags" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Flag" inverseName="results" inverseEntity="Flag" syncable="YES"/>
+        <relationship name="inspection" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Inspection" inverseName="results" inverseEntity="Inspection" syncable="YES"/>
+        <relationship name="variant" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Variant" inverseName="result" inverseEntity="Variant" syncable="YES"/>
+    </entity>
+    <entity name="Section" representedClassName=".Section" syncable="YES">
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="inspectionData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="InspectionData" inverseName="sections" inverseEntity="InspectionData" syncable="YES"/>
+        <relationship name="subSections" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="SubSection" inverseName="section" inverseEntity="SubSection" syncable="YES"/>
+    </entity>
+    <entity name="SubSection" representedClassName=".SubSection" syncable="YES">
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="isExpanded" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="comments" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Comment" inverseName="subSection" inverseEntity="Comment" syncable="YES"/>
+        <relationship name="inspectionData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="InspectionData" inverseName="subsections" inverseEntity="InspectionData" syncable="YES"/>
+        <relationship name="section" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Section" inverseName="subSections" inverseEntity="Section" syncable="YES"/>
+        <relationship name="variants" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Variant" inverseName="subSection" inverseEntity="Variant" syncable="YES"/>
+    </entity>
+    <entity name="Variant" representedClassName=".Variant" syncable="YES">
+        <attribute name="active" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="text" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="inspectionData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="InspectionData" inverseName="variants" inverseEntity="InspectionData" syncable="YES"/>
+        <relationship name="result" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Result" inverseName="variant" inverseEntity="Result" syncable="YES"/>
+        <relationship name="subSection" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SubSection" inverseName="variants" inverseEntity="SubSection" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Address" positionX="-126" positionY="-45" width="128" height="148"/>
+        <element name="AppValues" positionX="-1026" positionY="-54" width="128" height="120"/>
+        <element name="Client" positionX="88" positionY="125" width="128" height="163"/>
+        <element name="Comment" positionX="-902" positionY="68" width="128" height="165"/>
+        <element name="Flag" positionX="-720" positionY="68" width="128" height="103"/>
+        <element name="Inspection" positionX="-326" positionY="117" width="128" height="150"/>
+        <element name="InspectionData" positionX="-1199" positionY="2" width="128" height="165"/>
+        <element name="Inspector" positionX="-126" positionY="315" width="128" height="90"/>
+        <element name="Result" positionX="-515" positionY="119" width="128" height="195"/>
+        <element name="Section" positionX="-1262" positionY="146" width="128" height="103"/>
+        <element name="SubSection" positionX="-1089" positionY="144" width="128" height="148"/>
+        <element name="Variant" positionX="-900" positionY="252" width="128" height="133"/>
+    </elements>
+</model>

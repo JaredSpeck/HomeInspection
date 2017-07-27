@@ -9,72 +9,133 @@
 //
 
 import UIKit
+import CoreData
 
 class StateController {
     
-    /**
-     * State Variable
-     *
-     * Holds the State controller singleton, managing the current state of a single inspection.
-     */
+    // MARK: - Properties
+    
     static let state = StateController();
+    
     private let INSPECTION = 1
-    private let DEFAULT_DATA = 2
+    private let DEFAULT_DATA = 2 // sections, subsections, and comments
     private let RESULT = 3
+    private let LAST_CHANGE = 4
     
-    
-    
-    /* Properties */
-    
-    
-    
-    // TODO: Need a way to get the next available inspection id from the server. Maybe use a temp id for offline cache, then assign a permanent id right before integrating into database.
     private var inspectionId: Int? = nil
     private var nextResultId: Int = 0
     
-    // Arrays are indexed by their respective unique id's
+    var managedObjectContext: NSManagedObjectContext!
+    
+    // List of all inspections cached in device
+    private(set) var inspections = [Inspection]()
     
     // List of inspection results with unique resultId
-    private(set) var results = [Result?]()
+    private(set) var results = [Result]()
     
     // List of all section names with unique sectionId
-    private(set) var sections = Dictionary<Int, Section>()
+    private(set) var sections = [Section]()
     
     // List of all subsection names with unique subSectionId
-    private(set) var subsections = Dictionary<Int, SubSection>()
+    private(set) var subsections = [SubSection]()
     
     // List of all comments with unique commentId
-    private(set) var comments = Dictionary<Int, Comment>()
-    
-    // Mapping for section num, subsection num, and comment num in a subsection to a single commentId. NEED TO FIX MAPPING FUNCTION THAT FILLS THESE IN CORRECTLY
-    //private var commentIds = [[[Int]]]()
-    
-    private var wasPullError: Bool = false
-    private var dataIsInitialized: Bool = false
+    private(set) var comments = [Comment]()
+
     private var reusableResultIds = [Int]()
     
-    /* End of Properties */
+    // Holds timestamp of last time default data was modified
+    private var localModTimes: AppValues!
+    
+    // End of Properties
     
     
-    // Default initializer - Hidden to prevent reinitializing state. If one needs to load new values, use the loadState function (not implemented yet).
+    
+    // MARK: - Initialization
+    
+    // MARK: Flags
+    private var needCacheRefresh: Bool = true
+    private var dataIsInitialized: Bool = false
+    
+    // MARK: Initializer
+    // Default initializer - Hidden to prevent reinitializing state.
     private init() {
-        print("init state")
-        
         self.dataIsInitialized = false
+        print("Starting state init\n")
         
-        // Add a null (id = 0) comment (its function TBD later, maybe errors?)
-        //comments.append(Comment(commentId: 0, subSectionId: -1, rank: -1, commentText: "ERROR, COMMENT WITH ID 0", defaultFlags: [Int8](), active: false))
+        //loadData();
         
-        // Get and parse data from database
-        pullFromUrl(option: DEFAULT_DATA)
+        print("\nState init complete")
+        self.dataIsInitialized = true
+    }
+    
+    private func loadData(tries: Int = 0) {
+        // Initialize the managed object context (Core Data stack)
+        managedObjectContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         
+        // Ensures cache is up to date with most recent default data
+        validateCache()
         
-        // Polling for completion of database pull and parsing. Simple, but semaphores may be more efficient design (save extra fraction of a second and no wake then sleep again)
-        while (!wasPullError && !self.dataIsInitialized) {
-            sleep(1)
+        // Load default data from device
+        let sectionRequest: NSFetchRequest<Section> = Section.fetchRequest()
+        let subSectionRequest: NSFetchRequest<SubSection> = SubSection.fetchRequest()
+        let commentRequest: NSFetchRequest<Comment> = Comment.fetchRequest()
+        
+        // Load cached data from device
+        let inspectionRequest: NSFetchRequest<Inspection> = Inspection.fetchRequest()
+        let resutRequest:NSFetchRequest<Result> = Result.fetchRequest()
+        
+        do {
+            sections = try managedObjectContext.fetch(sectionRequest)
+            subsections = try managedObjectContext.fetch(subSectionRequest)
+            comments = try managedObjectContext.fetch(commentRequest)
+            inspections = try managedObjectContext.fetch(inspectionRequest)
+            results = try managedObjectContext.fetch(resutRequest)
+        } catch {
+            // Attempt to try again. (up to 3 attempts)
+            print("Error loading data from device memory: \(error.localizedDescription)")
+            if (tries < 2) {
+                loadData(tries: tries + 1)
+            } else {
+                print("Failed too many times. Quitting")
+            }
+        }
+    }
+    
+    // Refreshes the local cache of default data if out of sync with online database
+    // TODO: Completely wipes default data cache for now, maybe do changes only later
+    private func validateCache() {
+        // Get last change timestamp from device
+        let appValuesRequest: NSFetchRequest<AppValues> = AppValues.fetchRequest()
+        do {
+            let fetchResult = try managedObjectContext.fetch(appValuesRequest)
+            if (fetchResult.first != nil) {
+                localModTimes = fetchResult.first!
+            }
+        } catch {
+            print("Could not fetch last data update timestamp from device: \(error.localizedDescription)")
         }
         
+        // Check online for last change timestamp
+        print("\tChecking for updates...")
+        self.pullFromUrl(option: LAST_CHANGE)
+        
+        // FIXME: Remove once working correctly
+        
+        if (self.needCacheRefresh) {
+            print("\tUpdating...")
+            // Get and parse data from database
+            pullFromUrl(option: DEFAULT_DATA)
+        }
+        else {
+            print("\tCache up to date.")
+        }
+        
+        print("Local cache validated")
     }
+    
+    // End of Initialization
+    
     
     
     /**
@@ -84,46 +145,65 @@ class StateController {
      * then returns the value stored in the results for testing/updating the
      * calling controller's view
      */
-    // Appends the results array with a new entry with the given comment id. Returns the result id of the new entry
+    // MARK: - UI Data Transfer
+    
+    //Appends the results array with a new entry with the given comment id. Returns the result id of the new entry
     func userAddedResult(commentId: Int) -> Int {
         var returnId: Int
+        
+        var addedResult: Result
         
         if (reusableResultIds.count > 0) {
             // Place result in one of the holes in the list
             returnId = reusableResultIds.popLast()!
-            results[returnId] = Result(id: returnId, inspectionId: getNextInspId(), commentId: commentId, variantId: nil)
+            addedResult = results[returnId]
+            //results[returnId] = Result(id: returnId, inspectionId: getNextInspId(), commentId: commentId, variantId: nil)
+            addedResult.id = Int32(returnId)
+            //resultItem.inspection = getNextInspId()
+            addedResult.comment!.id = Int32(commentId)
+            addedResult.variant = nil
+            addedResult.isActive = true
+            
         }
         else {
             // Add result to the end of the list
-            results.append(Result(id: nextResultId, inspectionId: getNextInspId(), commentId: commentId, variantId: nil))
+            addedResult = Result(context: managedObjectContext)
+            addedResult.id = Int32(nextResultId)
+            //addedResult.inspection = ?
+            addedResult.comment!.id = Int32(commentId)
+            addedResult.variant = nil
+            addedResult.isActive = true
+            
+            results.append(addedResult)
             returnId = nextResultId
             nextResultId += 1
         }
         
-        comments[commentId]!.resultId = returnId
+        //comments[commentId].resultId = returnId
         
         return returnId
         
     }
+    
+    
     func userRemovedResult(resultId: Int) -> Void {
         
-        let removedResult = results[resultId]
-        let removedCommentId = removedResult!.commentId
+        //let removedResult = results[resultId]
         
-        comments[removedCommentId!]!.resultId = nil
+        //TODO: if let to test between comment and variant
+        //let removedCommentId = Int((removedResult.comment?.id)!)
+        
+        //comments[removedCommentId].resultId = nil
         
         // Add index of hole to reuasable id list
         reusableResultIds.append(resultId)
         
         // Make a hole in the results list
-        results[resultId] = nil
+        results[resultId].isActive = false
     }
     
     // Adds one to the severity and modulo's the result by 3. Returns the new severity value
-    func userChangedSeverity(resultId: Int) -> Int {
-        self.results[resultId]!.severity = (self.results[resultId]!.severity % 2) + 1
-        return self.results[resultId]!.severity
-    }
+
     
     func userChangedNote(resultId: Int, note: String) -> String {
         print("Note for \(resultId)")
@@ -146,10 +226,10 @@ class StateController {
     // Get subsection cell information
     
     func getSubSectionText(sectionId: Int, subSectionIndex: Int) -> String {
-        let currentSection = self.sections[sectionId]!
+        /*let currentSection = self.sections[sectionId]!
         let subSectionId = currentSection.subSectionIds[subSectionIndex]
-        
-        return subsections[subSectionId]!.subSectionName!
+        */
+        return "Under Construction"//subsections[subSectionId]!.subSectionName!
     }
     
     // Get variant cell information
@@ -163,7 +243,7 @@ class StateController {
     
     // Translates the cells location into a comment id
     func getCommentId(sectionId: Int, subSectionIndex: Int, rowNum: Int) -> Int? {
-        let currentSection = sections[sectionId]!
+        /*let currentSection = sections[sectionId]!
         let currentSubSection = subsections[currentSection.subSectionIds[subSectionIndex]]!
         
         let commentIndex = rowNum - currentSubSection.variantIds.count - 1
@@ -171,8 +251,10 @@ class StateController {
         
         print("Getting comment ID for cell in Section: \(sectionId), Subsection \(subSectionIndex + 1), with Rank: \(commentIndex + 1)")
         print("\(commentId)/\(comments.count)")
-    
-        return commentId
+
+        */
+        
+        return 0//commentId
     }
     
     func getCommentText(commentId: Int) -> String {
@@ -180,13 +262,13 @@ class StateController {
         if (commentId >= comments.count) {
             return "Error getting text for comment: Id \(commentId) out of range (\(comments.count))"
         }
-        return comments[commentId]!.commentText
+        return "Under Construction"//comments[commentId]!.commentText
     }
     
     func getSection(subSectionId: Int) -> Int {
         print("getting section for subsection \(subSectionId)")
         
-        return subsections[subSectionId]!.sectionId
+        return 0//subsections[subSectionId]!.sectionId
     }
     
     // End of UI data transfer functions
@@ -205,16 +287,18 @@ class StateController {
      */
     
     func getNextInspId() -> Int {
-        // TODO: Implement later, for now always assigns the first slot in the local inspection cache
+        // FIXME: Implement later, for now always assigns the first slot in the local inspection cache
         return -1;
     }
     
     
     
-    /* Database Integration Functions */
+    // MARK: - Database Integration
     
-    
+    // Pulls data from database and calls helper function to handle data
     func pullFromUrl(option: Int) {
+        var isPullFinished: Bool = false
+        var wasPullError: Bool = false
         var endPointURL: String = ""
         
         switch option {
@@ -225,13 +309,15 @@ class StateController {
             break
         case self.RESULT:
             break
+        case self.LAST_CHANGE:
+            break
         default:
             break
         }
         
         guard let url = URL(string: endPointURL) else {
-            print("Error: cannot create URL")
-            self.wasPullError = true
+            print("Error: Cannot create URL")
+            wasPullError = true
             return
         }
         let urlRequest = URLRequest(url: url)
@@ -241,78 +327,181 @@ class StateController {
         let task = session.dataTask(with: urlRequest) {
             (data, response, error) in
             guard error == nil else {
-                print("error calling GET on option")
+                print("Error: Calling GET on option \(option) failed")
                 print(error!)
-                self.wasPullError = true
+                wasPullError = true
                 return
             }
             guard let responseData = data else {
-                print ("Error: did not recieve data")
-                self.wasPullError = true
+                print ("Error: Received no date")
+                wasPullError = true
                 return
             }
             do {
                 let json = JSON(data: responseData)
                 switch option {
                 case self.INSPECTION:
-                    // Parse inspection?
-                    break;
+                    // FIXME: Parse inspection?
+                    break
                 case self.DEFAULT_DATA:
                     self.parseDefaultData(json: json)
                     self.dataIsInitialized = true
-                    break;
+                    isPullFinished = true
+                    break
                 case self.RESULT:
-                    // Parse results?
-                    break;
+                    // FIXME: Parse results?
+                    break
+                case self.LAST_CHANGE:
+                    self.needCacheRefresh = self.compareTimes(lastUpdateJson: json)
+                    isPullFinished = true
+                    break
                 default:
                     print("Cannot parse JSON of type \(option)")
                 }
             }
         }
         task.resume()
-    }
-    
-    func parseDefaultData(json: JSON) {
-        for (_, sectionJson) in json["sections"] {
-            let sectionId = sectionJson["id"].intValue
-            
-            self.sections[sectionId] = Section(
-                    id: sectionJson["id"].intValue,
-                    name: sectionJson["name"].string
-            )
-            
-            for (_, subSectionJson) in sectionJson["subsections"] {
-                let subSectionId = subSectionJson["id"].intValue
-                
-                self.subsections[subSectionId] = SubSection(
-                        subSectionId: subSectionJson["id"].intValue,
-                        name: subSectionJson["name"].string,
-                        sectionId: subSectionJson["sec_id"].intValue
-                )
-                
-                // Add subsec id to section's subsec list
-                self.sections[sectionId]!.subSectionIds.append(subSectionId)
-                
-                for (_, commentJson) in subSectionJson["comments"] {
-                    let commentId = commentJson["id"].intValue
-                    
-                    self.comments[commentId] = Comment(
-                            commentId: commentJson["id"].intValue,
-                            subSectionId: commentJson["subsec_id"].intValue,
-                            rank: commentJson["rank"].intValue,
-                            commentText: commentJson["comment"].string,
-                            defaultFlags: [], //Fix this
-                            active: commentJson["active"] == 1 ? true:false
-                    )
-                    
-                    // Add comment id to subsection's comment list
-                    self.subsections[subSectionId]!.commentIds.append(commentId)
-                }
-            }
+        
+        // Wait for pull to complete before returning
+        while (!wasPullError && !isPullFinished) {
+            print("Waiting on pull for option \(option) to finish")
+            sleep(1)
         }
     }
     
+    // MARK: Data Handling Functions
     
-    /* End of Database Integration Functions */
+    // Parses default data from database and uses data to refresh the local cache (delete old and insert new values)
+    func parseDefaultData(json: JSON) {
+        
+        // Flush out old data from cache
+        self.deleteAllInstances(entityName: "Section")
+        self.deleteAllInstances(entityName: "SubSection")
+        self.deleteAllInstances(entityName: "Comment")
+        
+        // Load in new data to the cache
+        for (_, sectionJson) in json["sections"] {
+            let newSection = Section(context: managedObjectContext)
+            
+            // Set section attributes
+            newSection.id = Int32(sectionJson["id"].intValue)
+            newSection.name = sectionJson["name"].string
+            
+            for (_, subSectionJson) in sectionJson["subsections"] {
+                let newSubSection = SubSection(context: managedObjectContext)
+                
+                // Set subsection attributes
+                newSubSection.id = Int32(subSectionJson["id"].intValue)
+                newSubSection.name = subSectionJson["name"].string
+                
+                // Set subsection relationships FIXME: does this add inverse reference as well?
+                newSubSection.section = newSection
+                
+                // FIXME: add variant parsing here
+                
+                for (_, commentJson) in subSectionJson["comments"] {
+                    //let commentId = commentJson["id"].intValue
+                    let newComment = Comment(context: managedObjectContext)
+                    
+                    // Set comment attributes
+                    newComment.id = Int32(commentJson["id"].intValue)
+                    newComment.rank = Int16(commentJson["rank"].intValue)
+                    newComment.text = commentJson["comment"].string
+                    newComment.active = (commentJson["active"] == 1 ? true : false)
+                    
+                    // Set comment relationships
+                    newComment.subSection = newSubSection
+                    
+                    // FIXME: add default flag parsing here
+
+                }
+            }
+        }
+        
+        // Save cache changes to disk
+        do {
+            try self.managedObjectContext.save()
+        } catch {
+            print("Could not save data \(error.localizedDescription)")
+        }
+    }
+    
+    // Compares last updated times for the default data tables for continuity with database
+    private func compareTimes(lastUpdateJson: JSON) -> Bool {
+        var doTimesDiffer: Bool = true
+        
+        // Parse times from database
+        let lastCommentUpdate: String = lastUpdateJson["commentTime"].string!
+        let lastSubSectionUpdate: String = lastUpdateJson["subSectionTime"].string!
+        let lastSectionUpdate: String = lastUpdateJson["sectionTime"].string!
+        
+        // Get times from cache (if there is one)
+        let fetchRequest: NSFetchRequest<AppValues> = AppValues.fetchRequest()
+        do {
+            let fetchRequestResults = try self.managedObjectContext.fetch(fetchRequest)
+            print("\tFound \(fetchRequestResults.count > 0 ? "saved " : "no saved") data.")
+            
+            // Check for correct number of update time in local cache
+            if (fetchRequestResults.count == 1) {
+                let appValues: AppValues = fetchRequestResults.first!
+                
+                if (lastCommentUpdate == appValues.commentModTime &&
+                    lastSubSectionUpdate == appValues.subSectionModTime &&
+                    lastSectionUpdate == appValues.sectionModTime) {
+                    
+                    // Local cache and database times match, no refresh required
+                    doTimesDiffer = false
+                }
+            }
+            else if (fetchRequestResults.count > 1 || fetchRequestResults.count < 0) {
+                print("Incorrect number of local update times found. Deleting and refreshing cache")
+            }
+            else {
+                print("No local update times found. Refreshing cache")
+            }
+            
+            
+        } catch {
+            print("\nError getting last updated time from core data:\n\(error)")
+        }
+        // FIXME: Need to get a url for update time
+        return true//doTimesDiffer
+    }
+    
+
+    
+    // End of Database Integration Functions
+    
+    
+    
+        
+    private func deleteAllInstances(entityName: String) {
+        let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetch)
+        
+        do {
+            try self.managedObjectContext.execute(deleteRequest)
+        } catch {
+            print("Error flushing \(entityName) instances from cache")
+        }
+    }
+    
+    private func getCachedSection() {
+    
+    }
+    
+    private func getCachedSubSection() {
+        
+    }
+    
+    private func getCachedComment() {
+        
+    }
+    
+    private func getCachedResult() {
+        
+    }
+    
+    // End of Core Data Stack/Support
     
 }

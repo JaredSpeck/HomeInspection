@@ -8,7 +8,7 @@
 
 import UIKit
 
-class Comment {
+class OldComment {
     
     //MARK: Properties
     private(set) var commentId: Int!
