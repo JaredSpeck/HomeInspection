@@ -63,8 +63,6 @@ class StateController {
         self.dataIsInitialized = false
         print("Starting state init\n")
         
-        //loadData();
-        
         print("\nState init complete")
         self.dataIsInitialized = true
     }
@@ -103,7 +101,6 @@ class StateController {
     }
     
     // Refreshes the local cache of default data if out of sync with online database
-    // TODO: Completely wipes default data cache for now, maybe do changes only later
     private func validateCache() {
         // Get last change timestamp from device
         let appValuesRequest: NSFetchRequest<AppValues> = AppValues.fetchRequest()
@@ -157,9 +154,7 @@ class StateController {
             // Place result in one of the holes in the list
             returnId = reusableResultIds.popLast()!
             addedResult = results[returnId]
-            //results[returnId] = Result(id: returnId, inspectionId: getNextInspId(), commentId: commentId, variantId: nil)
             addedResult.id = Int32(returnId)
-            //resultItem.inspection = getNextInspId()
             addedResult.comment!.id = Int32(commentId)
             addedResult.variant = nil
             addedResult.isActive = true
@@ -169,7 +164,6 @@ class StateController {
             // Add result to the end of the list
             addedResult = Result(context: managedObjectContext)
             addedResult.id = Int32(nextResultId)
-            //addedResult.inspection = ?
             addedResult.comment!.id = Int32(commentId)
             addedResult.variant = nil
             addedResult.isActive = true
@@ -179,7 +173,6 @@ class StateController {
             nextResultId += 1
         }
         
-        //comments[commentId].resultId = returnId
         
         return returnId
         
@@ -187,23 +180,12 @@ class StateController {
     
     
     func userRemovedResult(resultId: Int) -> Void {
-        
-        //let removedResult = results[resultId]
-        
-        //TODO: if let to test between comment and variant
-        //let removedCommentId = Int((removedResult.comment?.id)!)
-        
-        //comments[removedCommentId].resultId = nil
-        
-        // Add index of hole to reuasable id list
+    // Add index of hole to reuasable id list
         reusableResultIds.append(resultId)
         
         // Make a hole in the results list
         results[resultId].isActive = false
     }
-    
-    // Adds one to the severity and modulo's the result by 3. Returns the new severity value
-
     
     func userChangedNote(resultId: Int, note: String) -> String {
         print("Note for \(resultId)")
@@ -224,7 +206,7 @@ class StateController {
     
     
     // Get subsection cell information
-    
+    // (DEPRECATED)
     func getSubSectionText(sectionId: Int, subSectionIndex: Int) -> String {
         /*let currentSection = self.sections[sectionId]!
         let subSectionId = currentSection.subSectionIds[subSectionIndex]
@@ -233,7 +215,7 @@ class StateController {
     }
     
     // Get variant cell information
-    
+    // (DEPRECATED)
     func getVariantString() -> String {
         return "r;Type:;5;A;B;C;D;E;1;0;0;0;0;"
     }
@@ -242,6 +224,7 @@ class StateController {
     // Get comment cell information
     
     // Translates the cells location into a comment id
+    // (DEPRECATED)
     func getCommentId(sectionId: Int, subSectionIndex: Int, rowNum: Int) -> Int? {
         /*let currentSection = sections[sectionId]!
         let currentSubSection = subsections[currentSection.subSectionIds[subSectionIndex]]!
@@ -257,6 +240,7 @@ class StateController {
         return 0//commentId
     }
     
+    // (DEPRECATED)
     func getCommentText(commentId: Int) -> String {
         //print("Accessing comment \(commentId)/\(comments.count)")
         if (commentId >= comments.count) {
@@ -265,6 +249,7 @@ class StateController {
         return "Under Construction"//comments[commentId]!.commentText
     }
     
+    // (DEPRECATED)
     func getSection(subSectionId: Int) -> Int {
         print("getting section for subsection \(subSectionId)")
         
@@ -287,7 +272,7 @@ class StateController {
      */
     
     func getNextInspId() -> Int {
-        // FIXME: Implement later, for now always assigns the first slot in the local inspection cache
+        // TODO: For now, always assigns the first slot in the local inspection cache
         return -1;
     }
     
